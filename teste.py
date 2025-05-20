@@ -1,0 +1,25 @@
+from Estado import Estado
+from Transicao import Transicao
+from Automato import Automato
+
+
+
+# Estados
+q0 = Estado("q0")
+q1 = Estado("q1")
+q2 = Estado("q2")
+
+# Transições
+t1 = Transicao(q0, '&', q1)
+
+t3 = Transicao(q2, 'a', q2)
+
+# Criando o autômato
+A = Automato(
+    n_estados=3,
+    inicial=q0,
+    finais={q2},
+    transicoes={t1, t3},
+    alfabeto={'a'})
+
+print(A.calcula_efecho(q0))
