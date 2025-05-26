@@ -20,8 +20,14 @@ class Transicao():
     def get_destino(self):
         return self.destino
 
+
+
+
     def __str__(self):
-        return f"{self.origem},{self.simbolo},{self.destino}"
+        AMARELO = '\033[93m'
+        RESET = '\033[0m'
+        return f"{self.origem},{AMARELO}{self.simbolo}{RESET},{self.destino}"
+
 
     def __repr__(self):
         return self.__str__()

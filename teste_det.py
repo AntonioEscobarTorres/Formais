@@ -2,8 +2,6 @@ from Estado import Estado
 from Transicao import Transicao
 from Automato import Automato
 
-
-
 # Estados
 q0 = Estado("q0")
 q1 = Estado("q1")
@@ -29,3 +27,5 @@ A = Automato(
 
 print(A.calcula_efecho(q0))
 print(A.determinizar())
+
+

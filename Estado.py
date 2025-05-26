@@ -11,13 +11,7 @@ class Estado:
         return self.estado
 
     def __str__(self):
-        return "{" + self.estado + "}"
+        return self.estado
 
     def __repr__(self):
         return self.__str__()
-
-    def __eq__(self, other):
-        return isinstance(other, Estado) and self.estado == other.estado
-
-    def __hash__(self):
-        return hash(self.estado)

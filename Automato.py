@@ -9,7 +9,7 @@ class Automato:
                  transicoes : set[Transicao] , alfabeto : set[str]):
         
         self.n_estados = n_estados
-        self.incial = inicial
+        self.inicial = inicial
         self.finais = finais
         self.transicoes = transicoes
         self.alfabeto = alfabeto
@@ -34,7 +34,7 @@ class Automato:
 
     def determinizar(self):
         # Calcula E fecho e define o estado inicial por um nome único
-        estado_inicial_afd = self.calcula_efecho(self.incial)
+        estado_inicial_afd = self.calcula_efecho(self.inicial)
         nome_inicial = self.gerar_nome(estado_inicial_afd)
 
         # Cria o primeiro estado determinisco, o colocando na fila 
@@ -82,9 +82,11 @@ class Automato:
         )
 
 
-    # Gera um nome único para novos estados que sejam a união de estados já existentes
     def gerar_nome(self, conjunto):
-        return ''.join(sorted(estado.get_estado() for estado in conjunto))
+        # Pega só o nome 'limpo' do estado, sem chaves
+        return ''.join(sorted(estado.estado for estado in conjunto))
+
+
 
     # Verifica se o conjunto de estados tem algum elemento que é estado final,
     # assim dando a condição de estado final para o estado unido
@@ -117,7 +119,7 @@ class Automato:
 
         return (
             "\n=== AUTÔMATO ===\n"
-            f"Estado Inicial: {self.incial}\n"
+            f"Estado Inicial: {{{self.inicial}}}\n"
             f"Estados Finais: {{ {finais_str} }}\n"
             f"Alfabeto: {{{alfabeto_str}}}\n"
             "Transições:\n"
@@ -125,4 +127,31 @@ class Automato:
             "=================\n"
     )
 
+    def get_estados(self) -> Set[Estado]:
+        estados = set()
+
+        # Adiciona o estado inicial
+        estados.add(self.inicial)
+
+        # Adiciona os estados finais
+        estados.update(self.finais)
+
+        # Adiciona todos os estados que aparecem nas transições
+        for transicao in self.transicoes:
+            estados.add(transicao.get_origem())
+            estados.add(transicao.get_destino())
+
+        return estados
+
+    def get_transicoes(self):
+        return self.transicoes
+
+    def get_inicial(self):
+        return self.inicial
+
+    def get_finais(self):
+        return self.finais
+
+    def get_alfabeto(self):
+        return self.alfabeto
 
