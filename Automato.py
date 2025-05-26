@@ -34,40 +34,64 @@ class Automato:
 
     def determinizar(self):
         estado_inicial_afd = self.calcula_efecho(self.incial)
-        nome_inicial = ''.join(sorted(estado.get_estado() for estado in estado_inicial_afd))
+        nome_inicial = self.gerar_nome(estado_inicial_afd)
         estados_deterministicos = {nome_inicial: Estado(nome_inicial)}
         fila = deque([estado_inicial_afd])
         finais_deterministicos = set()
-        transicoes_deterministicas = []
+        transicoes_deterministicas = set()
 
         while fila:
             conjunto_atual = fila.popleft()
-            nome_atual = ''.join(sorted(estado.get_estado() for estado in conjunto_atual))
-            
-            if any(estado in self.finais for estado in conjunto_atual):
+            nome_atual = self.gerar_nome(conjunto_atual)
+
+            if self.contem_final(conjunto_atual):
                 finais_deterministicos.add(nome_atual)
 
             for simbolo in self.alfabeto:
-                proximos_estados = set()
-                for estado in conjunto_atual:
-                    for transicao in self.transicoes:
-                        if transicao.get_origem() == estado and transicao.get_simbolo() == simbolo:
-                            proximos_estados.add(transicao.get_destino())
-                fecho_proximos = set()
-                for est in proximos_estados:
-                    fecho_proximos.update(self.calcula_efecho(est))
+                fecho_proximos = self.calcula_fecho_dos_destinos(conjunto_atual, simbolo)
 
                 if fecho_proximos:
-                    nome_proximo = ''.join(sorted(est.get_estado() for est in fecho_proximos))
+                    nome_proximo = self.gerar_nome(fecho_proximos)
                     if nome_proximo not in estados_deterministicos:
                         estados_deterministicos[nome_proximo] = Estado(nome_proximo)
                         fila.append(fecho_proximos)
-                    transicoes_deterministicas.append(
+
+                    transicoes_deterministicas.add(
                         Transicao(estados_deterministicos[nome_atual], simbolo, estados_deterministicos[nome_proximo])
                     )
 
         finais_convertidos = {estados_deterministicos[nome] for nome in finais_deterministicos}
-        return Automato(len(estados_deterministicos), estados_deterministicos[nome_inicial], finais_convertidos, set(transicoes_deterministicas), self.alfabeto)
+        return Automato(
+            len(estados_deterministicos),
+            estados_deterministicos[nome_inicial],
+            finais_convertidos,
+            transicoes_deterministicas,
+            self.alfabeto
+        )
+
+
+    # Gera um nome único para novos estados que sejam a união de estados já existentes
+    def gerar_nome(self, conjunto):
+        return ''.join(sorted(estado.get_estado() for estado in conjunto))
+
+    # Verifica se o conjunto de estados tem algum elemento que é estado final,
+    # assim dando a condição de estado final para o estado unido
+    def contem_final(self, conjunto):
+        return any(estado in self.finais for estado in conjunto)
+
+    # Calculo o Efecho dos estados alcançados a partir de um símbolo
+    def calcula_fecho_dos_destinos(self, conjunto_atual, simbolo):
+        destinos = {
+            transicao.get_destino()
+            for estado in conjunto_atual
+            for transicao in self.transicoes
+            if transicao.get_origem() == estado and transicao.get_simbolo() == simbolo
+        }
+        fecho = set()
+        for estado in destinos:
+            fecho.update(self.calcula_efecho(estado))
+        return fecho
+
 
 
 
