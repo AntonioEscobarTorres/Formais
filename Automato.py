@@ -33,29 +33,41 @@ class Automato:
 
 
     def determinizar(self):
+        # Calcula E fecho e define o estado inicial por um nome único
         estado_inicial_afd = self.calcula_efecho(self.incial)
         nome_inicial = self.gerar_nome(estado_inicial_afd)
+
+        # Cria o primeiro estado determinisco, o colocando na fila 
         estados_deterministicos = {nome_inicial: Estado(nome_inicial)}
         fila = deque([estado_inicial_afd])
+
+        # Cria conjuntos que comportam os estados finais do AFD e suas transições
         finais_deterministicos = set()
         transicoes_deterministicas = set()
 
+
+        # Repete o processo até que todos estados sejam processados
         while fila:
             conjunto_atual = fila.popleft()
             nome_atual = self.gerar_nome(conjunto_atual)
 
+            # Se o estado é final, então adiciona ele na lista 
             if self.contem_final(conjunto_atual):
                 finais_deterministicos.add(nome_atual)
 
+            # Para cada possível transição calcula os próximos estados possívei s 
             for simbolo in self.alfabeto:
                 fecho_proximos = self.calcula_fecho_dos_destinos(conjunto_atual, simbolo)
 
+                # Se houverem estados próximos, então confere-se, se não está na lista de estados, 
+                # sendo ele um novo estado, cria-se um estado novo e o adiciona na fila
                 if fecho_proximos:
                     nome_proximo = self.gerar_nome(fecho_proximos)
                     if nome_proximo not in estados_deterministicos:
                         estados_deterministicos[nome_proximo] = Estado(nome_proximo)
                         fila.append(fecho_proximos)
 
+                    # Adiciona-se também as transições associadas ao novo estado
                     transicoes_deterministicas.add(
                         Transicao(estados_deterministicos[nome_atual], simbolo, estados_deterministicos[nome_proximo])
                     )
@@ -81,12 +93,14 @@ class Automato:
 
     # Calculo o Efecho dos estados alcançados a partir de um símbolo
     def calcula_fecho_dos_destinos(self, conjunto_atual, simbolo):
+        # adiciona em destinos todas as transições que saem de algum estado do automato 
         destinos = {
             transicao.get_destino()
             for estado in conjunto_atual
             for transicao in self.transicoes
             if transicao.get_origem() == estado and transicao.get_simbolo() == simbolo
         }
+        # Calcula o fecho dos destinos, para garantir que a transição fique correta
         fecho = set()
         for estado in destinos:
             fecho.update(self.calcula_efecho(estado))
@@ -96,12 +110,19 @@ class Automato:
 
 
     def __str__(self):
-        finais_str = ','.join(str(estado) for estado in self.finais)
-        transicoes_str = '\n'.join(str(transicao) for transicao in self.transicoes)
+        # Formata os dados para impressão
+        finais_str = ', '.join(str(estado) for estado in self.finais)
+        transicoes_str = '\n'.join(f'  {str(transicao)}' for transicao in self.transicoes)
+        alfabeto_str = ', '.join(sorted(self.alfabeto))
 
-        return (f'''"Estado Inicial: " {self.incial}
-            "Estados Finais: " {finais_str}
-            "Alfabeto: " {"{" + ','.join(self.alfabeto) + "}"}
-            "Transições: "
-            {transicoes_str}''')
+        return (
+            "\n=== AUTÔMATO ===\n"
+            f"Estado Inicial: {self.incial}\n"
+            f"Estados Finais: {{ {finais_str} }}\n"
+            f"Alfabeto: {{{alfabeto_str}}}\n"
+            "Transições:\n"
+            f"{transicoes_str}\n"
+            "=================\n"
+    )
+
 
