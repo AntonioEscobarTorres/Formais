@@ -82,10 +82,9 @@ class Automato:
         )
 
 
-    def gerar_nome(self, conjunto):
-        # Pega só o nome 'limpo' do estado, sem chaves
-        return ''.join(sorted(estado.estado for estado in conjunto))
 
+    def gerar_nome(self, conjunto_estados: set) -> str:
+        return ','.join(sorted([estado.estado for estado in conjunto_estados]))
 
 
     # Verifica se o conjunto de estados tem algum elemento que é estado final,
