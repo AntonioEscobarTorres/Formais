@@ -1,4 +1,4 @@
-from ExpresaoRegular import ExpressaoRegular
+from ExpressaoRegular import ExpressaoRegular
 
 ER = ExpressaoRegular("a(b|a)*b")
 A = ER.thompson()

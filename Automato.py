@@ -109,18 +109,6 @@ class Automato:
         return fecho
 
 
-    def aceita(self, palavra: str) -> bool:
-        estado_atual = self.inicial
-        for simbolo in palavra:
-            proximo_estado = None
-            for transicao in self.transicoes:
-                if transicao.get_origem() == estado_atual and transicao.get_simbolo() == simbolo:
-                    proximo_estado = transicao.get_destino()
-                    break
-            if proximo_estado is None:
-                return False
-            estado_atual = proximo_estado
-        return estado_atual in self.finais
 
 
     def __str__(self):
