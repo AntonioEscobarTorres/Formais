@@ -28,8 +28,8 @@ class Automato:
                     if transicao.get_destino() not in visited:
                         visited.add(transicao.get_destino())
                         stack.append(transicao. get_destino())  
-
-                
+                        
+                                
         return visited
 
 

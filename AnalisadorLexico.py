@@ -79,9 +79,14 @@ class AnalisadorLexico:
 
         for i, (token, afn) in enumerate(automatos):
             prefixo = f"T{i}"
-            estados_renomeados = {
-                estado: Estado(f"{prefixo}_{estado}") for estado in afn.get_estados()
-            }
+
+            estados_renomeados = {}
+            for estado in afn.get_estados():
+                novo_estado = Estado(f"{prefixo}_{estado}")
+                estados_renomeados[estado] = novo_estado
+                if estado in afn.get_finais():
+                    self.token_map[novo_estado] = self.token_map[estado.estado] 
+
 
             todos_estados.update(estados_renomeados.values())
             for transicao in afn.get_transicoes():
