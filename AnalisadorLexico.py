@@ -31,7 +31,7 @@ class AnalisadorLexico:
 
         for i, automato in enumerate(automatos):
             prefixo = f"A{i}"
-
+            print(automato)
             # Renomeia os estados para identificar de qual automato cada estado está vindo
             estados_renomeados = {
                 estado: Estado(f"{prefixo}_{estado}") for estado in automato.get_estados()
