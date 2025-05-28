@@ -27,59 +27,70 @@ class Automato:
                 if transicao.get_origem() == estadoAtualPilha and transicao.get_simbolo() == "&":
                     if transicao.get_destino() not in visited:
                         visited.add(transicao.get_destino())
-                        stack.append(transicao.get_destino())          
+                        stack.append(transicao. get_destino())          
         return visited
 
 
 
-    def determinizar(self):
-        # Calcula E fecho e define o estado inicial por um nome único
+    def determinizar(self, token_map_afn):
+        # Calcula E-fecho e define o estado inicial com um nome único
         estado_inicial_afd = self.calcula_efecho(self.inicial)
         nome_inicial = self.gerar_nome(estado_inicial_afd)
+        
 
-        # Cria o primeiro estado determinisco, o colocando na fila 
+        # Cria o primeiro estado determinístico e o coloca na fila
         estados_deterministicos = {nome_inicial: Estado(nome_inicial)}
         fila = deque([estado_inicial_afd])
 
-        # Cria conjuntos que comportam os estados finais do AFD e suas transições
         finais_deterministicos = set()
         transicoes_deterministicas = set()
-
-
-        # Repete o processo até que todos estados sejam processados
+        token_map_afd = {} if token_map_afn is not None else None
+        # Processa todos os conjuntos de estados
         while fila:
             conjunto_atual = fila.popleft()
             nome_atual = self.gerar_nome(conjunto_atual)
 
-            # Se o estado é final, então adiciona ele na lista 
             if self.contem_final(conjunto_atual):
+
                 finais_deterministicos.add(nome_atual)
 
-            # Para cada possível transição calcula os próximos estados possívei s 
+                
+                # Mapeia para o token, se desejado
+                if token_map_afn is not None:
+                    for estado in conjunto_atual:
+                        if estado.estado in token_map_afn:
+                            token_map_afd[nome_atual] = token_map_afn[estado.estado]
+                            
+                            break  # prioriza o primeiro token encontrado
+
             for simbolo in self.alfabeto:
                 fecho_proximos = self.calcula_fecho_dos_destinos(conjunto_atual, simbolo)
 
-                # Se houverem estados próximos, então confere-se, se não está na lista de estados, 
-                # sendo ele um novo estado, cria-se um estado novo e o adiciona na fila
                 if fecho_proximos:
                     nome_proximo = self.gerar_nome(fecho_proximos)
                     if nome_proximo not in estados_deterministicos:
                         estados_deterministicos[nome_proximo] = Estado(nome_proximo)
                         fila.append(fecho_proximos)
 
-                    # Adiciona-se também as transições associadas ao novo estado
                     transicoes_deterministicas.add(
                         Transicao(estados_deterministicos[nome_atual], simbolo, estados_deterministicos[nome_proximo])
                     )
 
         finais_convertidos = {estados_deterministicos[nome] for nome in finais_deterministicos}
-        return Automato(
+
+        afd = Automato(
             len(estados_deterministicos),
             estados_deterministicos[nome_inicial],
             finais_convertidos,
             transicoes_deterministicas,
             self.alfabeto
         )
+
+ 
+        # Retorna também o mapeamento dos tokens, se aplicável
+        if token_map_afd is not None:
+            return afd, token_map_afd
+        return afd
 
 
 

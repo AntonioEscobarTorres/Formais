@@ -30,8 +30,13 @@ class AnalisadorLexico:
             automatos.append((token, afn))
 
         self.afn_unificado = self.uniao_via_etransicao(automatos)
-        self.afd = self.afn_unificado.determinizar()
 
+        self.afd, tabela_tokens_atualizada = self.afn_unificado.determinizar(self.token_map)
+     
+        for token in tabela_tokens_atualizada.keys():
+            self.token_map[token] = tabela_tokens_atualizada[token]
+       
+        
         # ✅ Passo 2: construir mapeamento do token nos estados finais do AFD
         for estado in self.afd.get_finais():
             nomes_estados_afn = estado.estado.split(',')
@@ -40,6 +45,7 @@ class AnalisadorLexico:
                     self.token_map[estado.estado] = self.token_map[nome_afn]
                     break
 
+        print(self.token_map)
 
 
     def reconhecer_token(self, palavra: str) -> str:
