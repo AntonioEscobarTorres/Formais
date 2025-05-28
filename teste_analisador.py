@@ -9,6 +9,6 @@ expressoes = [
 
 analisador = AnalisadorLexico(expressoes)
 
-print(analisador.reconhecer_token("aaa"))  # Deve retornar NUM
+print(analisador.reconhecer_token("aaaaaa"))  # Deve retornar NUM
 print(analisador.reconhecer_token("ab"))   # Deve retornar AB_TOKEN
 print(analisador.reconhecer_token("b"))    # Deve retornar "Token não reconhecido"

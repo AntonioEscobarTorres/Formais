@@ -25,16 +25,18 @@ class AnalisadorLexico:
             for estado_final in afn.get_finais():
                 self.token_map[estado_final.get_estado()] = token
 
-
-
             automatos.append((token, afn))
 
         self.afn_unificado = self.uniao_via_etransicao(automatos)
 
+
         self.afd, tabela_tokens_atualizada = self.afn_unificado.determinizar(self.token_map)
-     
+        print(self.afd)
+        print(tabela_tokens_atualizada)
+
         for token in tabela_tokens_atualizada.keys():
             self.token_map[token] = tabela_tokens_atualizada[token]
+        
        
         
         # ✅ Passo 2: construir mapeamento do token nos estados finais do AFD
