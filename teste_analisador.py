@@ -1,10 +1,14 @@
 from AnalisadorLexico import AnalisadorLexico
 
-# Lista de expressões regulares
-expressoes = ["a*", "ab"]
+expressoes = [
+    ("NUM", "a*"),
+    ("AB_TOKEN", "ab")
+]
 
-# Instancia o analisador léxico com as ERs
+
+
 analisador = AnalisadorLexico(expressoes)
 
-# Imprime o AFD resultante da união e determinização
-print(analisador.afd)
+print(analisador.reconhecer_token("aaaaaa"))  # Deve retornar NUM
+print(analisador.reconhecer_token("ab"))   # Deve retornar AB_TOKEN
+print(analisador.reconhecer_token("b"))    # Deve retornar "Token não reconhecido"
