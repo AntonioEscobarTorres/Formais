@@ -3,8 +3,15 @@ from Estado import Estado
 from Transicao import Transicao
 
 class ExpressaoRegular:
+    _counter = 0
+
     def __init__(self, expressao: str):
         self.expressao = expressao
+
+    def _novo_estado(self, prefixo: str) -> Estado:
+        nome = f"{prefixo}{ExpressaoRegular._counter}"
+        ExpressaoRegular._counter += 1
+        return Estado(nome)
 
     def thompson(self):
         # Adiciona concatenação explícita (.)
@@ -30,7 +37,7 @@ class ExpressaoRegular:
                 elif c == '(':
                     stack.append(c)
                 elif c == ')':
-                    while stack and stack[-1] != '(':
+                    while stack and stack[-1] != '(':  # desempilha até '('
                         output.append(stack.pop())
                     stack.pop()
                 else:
@@ -43,14 +50,14 @@ class ExpressaoRegular:
 
         # Funções de construção de AFN para cada operador
         def simbolo_afn(simbolo):
-            s0 = Estado("q0")
-            s1 = Estado("q1")
+            s0 = self._novo_estado("q")
+            s1 = self._novo_estado("q")
             trans = {Transicao(s0, simbolo, s1)}
             return Automato(2, s0, {s1}, trans, {simbolo})
 
         def uniao_afn(a1, a2):
-            s0 = Estado("qU0")
-            s1 = Estado("qU1")
+            s0 = self._novo_estado("qU")
+            s1 = self._novo_estado("qU")
             trans = set()
             trans.add(Transicao(s0, '&', a1.get_inicial()))
             trans.add(Transicao(s0, '&', a2.get_inicial()))
@@ -67,11 +74,7 @@ class ExpressaoRegular:
             return Automato(len(estados), s0, {s1}, trans, alfabeto)
 
         def concat_afn(a1, a2):
-            trans = set()
-            for t in a1.get_transicoes():
-                trans.add(t)
-            for t in a2.get_transicoes():
-                trans.add(t)
+            trans = set(a1.get_transicoes()) | set(a2.get_transicoes())
             for f in a1.get_finais():
                 trans.add(Transicao(f, '&', a2.get_inicial()))
             estados = a1.get_estados() | a2.get_estados()
@@ -79,8 +82,8 @@ class ExpressaoRegular:
             return Automato(len(estados), a1.get_inicial(), a2.get_finais(), trans, alfabeto)
 
         def estrela_afn(a):
-            s0 = Estado("qE0")
-            s1 = Estado("qE1")
+            s0 = self._novo_estado("qE")
+            s1 = self._novo_estado("qE")
             trans = set()
             trans.add(Transicao(s0, '&', a.get_inicial()))
             trans.add(Transicao(s0, '&', s1))
@@ -94,8 +97,8 @@ class ExpressaoRegular:
             return Automato(len(estados), s0, {s1}, trans, alfabeto)
 
         def opcional_afn(a):
-            s0 = Estado("qO0")
-            s1 = Estado("qO1")
+            s0 = self._novo_estado("qO")
+            s1 = self._novo_estado("qO")
             trans = set()
             trans.add(Transicao(s0, '&', a.get_inicial()))
             trans.add(Transicao(s0, '&', s1))
