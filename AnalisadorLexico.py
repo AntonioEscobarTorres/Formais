@@ -5,14 +5,14 @@ from ExpressaoRegular import ExpressaoRegular
 
 class AnalisadorLexico:
   
-    def __init__(self, expressoes: list[tuple[str, str]]):  # (token, regex)
-        self.expressoes = expressoes
+    def __init__(self):  # (token, regex)
+        self.expressoes = self.ler_expressoes()
         self.token_map = {}  # estado final → token
         self.afn_unificado = None
         self.afd = None
         self._processar()
         self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
-
+        self.analisar_entrada(self.ler_entrada())
 
     def analisar_entrada(self, entrada: str) -> list[tuple[str, str]]:
         resultado = []
@@ -24,6 +24,15 @@ class AnalisadorLexico:
 
         return resultado
 
+    def ler_entrada(self):
+        return "aaaaaa ab b baaaaab aaa ab acd"
+
+    def ler_expressoes(self):
+        return [
+                ("NUM", "a*"),
+                ("AB_TOKEN", "ab"),
+                ("BnoINICIO", "b(a|b)*")
+            ]
 
 
     def _processar(self):

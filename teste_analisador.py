@@ -10,8 +10,8 @@ expressoes = [
 entrada = "aaaaaa ab b baaaaab aaa ab acd"
 
 
-analisador = AnalisadorLexico(expressoes)
-print(analisador.analisar_entrada(entrada))
+analisador = AnalisadorLexico()
+
 
 print(30*"-")
 
