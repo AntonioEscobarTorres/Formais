@@ -6,13 +6,13 @@ from ExpressaoRegular import ExpressaoRegular
 class AnalisadorLexico:
   
     def __init__(self):  # (token, regex)
-        self.expressoes = self.ler_arquivo_er("/Users/antonio/Formais/expressoes.txt")
+        self.expressoes = self.ler_arquivo_er("./expressoes.txt")
         self.token_map = {}  # estado final → token
         self.afn_unificado = None
         self.afd = None
         self._processar()
         self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
-        self.analisar_entrada(self.ler_arquivo_entrada("/Users/antonio/Formais/testes.txt"))
+        self.analisar_entrada(self.ler_arquivo_entrada("./testes.txt"))
 
     def analisar_entrada(self, entrada: list[str]) -> list[tuple[str, str]]:
         resultado = []
@@ -36,6 +36,7 @@ class AnalisadorLexico:
 
     def ler_arquivo_er(self, caminho_arquivo):
         expressoes = []
+        prioridade_atual = 0
 
         with open(caminho_arquivo, "r") as arquivo:
             conteudo = arquivo.read()
@@ -51,7 +52,8 @@ class AnalisadorLexico:
             nome = nome.strip()
             expressao = expressao.strip()
 
-            expressoes.append((nome, expressao))
+            expressoes.append((nome, expressao, prioridade_atual))
+            prioridade_atual += 1
 
         return expressoes
 
@@ -69,40 +71,75 @@ class AnalisadorLexico:
 
     def _processar(self):
         automatos = []
-        self.token_map = {}  # Certifique-se de inicializar aqui também
+        
+        nfa_original_final_state_info = {}
 
-        for token, er in self.expressoes:
+        for token, er, priority in self.expressoes:
             afn = ExpressaoRegular(er).thompson()
-            print(afn)
+            # print(f"AFN for {token} ({priority}): {afn}")
 
+            for estado_final_nfa in afn.get_finais():
+                nfa_state_name = estado_final_nfa.get_estado()
+                if nfa_state_name not in nfa_original_final_state_info or \
+                   priority < nfa_original_final_state_info[nfa_state_name][1]:
+                    nfa_original_final_state_info[nfa_state_name] = (token, priority)
             
-            for estado_final in afn.get_finais():
-                self.token_map[estado_final.get_estado()] = token
-
             automatos.append((token, afn))
 
         self.afn_unificado = self.uniao_via_etransicao(automatos)
+        # print(f"AFN Unificado: {self.afn_unificado}")
 
-
-        self.afd, tabela_tokens_atualizada = self.afn_unificado.determinizar(self.token_map)
-        print(self.afd)
-        print(tabela_tokens_atualizada)
-
-        for token in tabela_tokens_atualizada.keys():
-            self.token_map[token] = tabela_tokens_atualizada[token]
+        temp_nfa_map_for_determinize = {
+            state: info[0] for state, info in nfa_original_final_state_info.items()
+        }
         
-       
+        self.afd, tabela_de_tokens_do_determinizar = self.afn_unificado.determinizar(temp_nfa_map_for_determinize) 
+        print(f"AFD: {self.afd}")
+        print(f"Tabela de tokens (from determinizar): {tabela_de_tokens_do_determinizar}")
+
+        final_prioritized_afd_token_map = {}
         
-        #
-        for estado in self.afd.get_finais():
-            nomes_estados_afn = estado.estado.split(',')
-            for nome_afn in nomes_estados_afn:
-                if nome_afn in self.token_map:
-                    self.token_map[estado.estado] = self.token_map[nome_afn]
-                    break
+        #print(f"[DEBUG _processar] Nomes dos estados finais do AFD: {[s.get_estado() for s in self.afd.get_finais()]}")
+        #print(f"[DEBUG _processar] Conteúdo de nfa_original_final_state_info: {nfa_original_final_state_info}")
 
-        print(self.token_map)
+        for afd_final_state_obj in self.afd.get_finais():
+            afd_state_name_str = afd_final_state_obj.get_estado()
+            #print(f"[DEBUG _processar] Processando estado final do AFD: {afd_state_name_str}")
+            
+            component_unified_nfa_state_names = afd_state_name_str.split(',')
+            
+            best_token_for_afd_state = None
+            highest_priority_value = float('inf')
 
+            for unified_nfa_name_component in component_unified_nfa_state_names:
+                unified_nfa_name_component = unified_nfa_name_component.strip()
+                
+                original_nfa_name_candidate = unified_nfa_name_component
+
+                if '_' in unified_nfa_name_component:
+                    parts = unified_nfa_name_component.split('_', 1)
+                    if len(parts) > 1 and parts[0].startswith('T') and parts[0][1:].isdigit():
+                        original_nfa_name_candidate = parts[1]
+                
+                #print(f"[DEBUG _processar]   Componente unificado: {unified_nfa_name_component}, Candidato original: {original_nfa_name_candidate}")
+                
+                if original_nfa_name_candidate in nfa_original_final_state_info:
+                    token_candidate, priority_candidate = nfa_original_final_state_info[original_nfa_name_candidate]
+                    #print(f"[DEBUG _processar]     Encontrado em nfa_original_final_state_info: Token={token_candidate}, Prioridade={priority_candidate}")
+                    
+                    if priority_candidate < highest_priority_value:
+                        highest_priority_value = priority_candidate
+                        best_token_for_afd_state = token_candidate
+                        #print(f"[DEBUG _processar]       Novo melhor token para {afd_state_name_str}: {best_token_for_afd_state} (Prioridade: {highest_priority_value})")
+
+            if best_token_for_afd_state is not None:
+                final_prioritized_afd_token_map[afd_state_name_str] = best_token_for_afd_state
+                #print(f"[DEBUG _processar] Mapeado estado AFD '{afd_state_name_str}' para token '{best_token_for_afd_state}'")
+            #else:
+                #print(f"[DEBUG _processar] Nenhum token encontrado para o estado AFD '{afd_state_name_str}'")
+        
+        self.token_map = final_prioritized_afd_token_map
+        #print(f"Token map final (prioritized): {self.token_map}") 
 
     def reconhecer_token(self, palavra: str) -> str:
         estado_atual = self.afd.get_inicial()

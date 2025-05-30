@@ -1,3 +1,4 @@
-NUM:a*
+NUM:a*b
+TESTE:a*(a|b)
 AB_TOKEN:ab
 BnoINICIO:b(a|b)*
