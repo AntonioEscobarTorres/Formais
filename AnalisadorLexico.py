@@ -11,6 +11,7 @@ class AnalisadorLexico:
         self.afn_unificado = None
         self.afd = None
         self._processar()
+        self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
 
 
     def _processar(self):
@@ -39,7 +40,7 @@ class AnalisadorLexico:
         
        
         
-        # ✅ Passo 2: construir mapeamento do token nos estados finais do AFD
+        #
         for estado in self.afd.get_finais():
             nomes_estados_afn = estado.estado.split(',')
             for nome_afn in nomes_estados_afn:
@@ -65,10 +66,13 @@ class AnalisadorLexico:
             print(f"[DEBUG] Novo estado: {estado_atual.estado}")
 
         if estado_atual in self.afd.get_finais():
-            print(f"[DEBUG] Estado final alcançado: {estado_atual.estado}")
-            return self.token_map.get(estado_atual.estado, "Token desconhecido")
 
-        print("[DEBUG] Estado final não alcançado")
+            print(f"[DEBUG] Estado final alcançado: {estado_atual.estado}")
+
+            self.tabela_de_simbolos[palavra] = self.token_map.get(estado_atual.estado, "Token desconhecido")
+
+            return self.token_map.get(estado_atual.estado, "Token desconhecido")
+            
         return "Token não reconhecido"
 
 
