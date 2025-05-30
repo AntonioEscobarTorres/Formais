@@ -2,17 +2,18 @@ from Estado import Estado
 from Transicao import Transicao
 from Automato import Automato
 from ExpressaoRegular import ExpressaoRegular
+from LeitorDeEr import LeitorDeEr
 
 class AnalisadorLexico:
   
     def __init__(self):  # (token, regex)
-        self.expressoes = self.ler_arquivo_er("./expressoes.txt")
+        self.expressoes = LeitorDeEr.ler_arquivo_er("./expressoes.txt")
         self.token_map = {}  # estado final → token
         self.afn_unificado = None
         self.afd = None
         self._processar()
         self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
-        self.analisar_entrada(self.ler_arquivo_entrada("./testes.txt"))
+        self.analisar_entrada(LeitorDeEr.ler_arquivo_entrada("./testes.txt"))
 
     def analisar_entrada(self, entrada: list[str]) -> list[tuple[str, str]]:
         resultado = []
@@ -22,7 +23,6 @@ class AnalisadorLexico:
             resultado.append((palavra, token))
 
         return resultado
-
 
     def ler_entrada(self):
         return "aaaaaa ab b baaaaab aaa ab acd"
@@ -34,47 +34,12 @@ class AnalisadorLexico:
                 ("BnoINICIO", "b(a|b)*")
             ]
 
-    def ler_arquivo_er(self, caminho_arquivo):
-        expressoes = []
-        prioridade_atual = 0
-
-        with open(caminho_arquivo, "r") as arquivo:
-            conteudo = arquivo.read()
-
-        # Divide pelas definições separadas por espaço
-        definicoes = conteudo.strip().split()
-
-        for definicao in definicoes:
-            if ':' not in definicao:
-                raise ValueError(f"Definição malformada: {definicao}")
-
-            nome, expressao = definicao.split(":", 1)
-            nome = nome.strip()
-            expressao = expressao.strip()
-
-            expressoes.append((nome, expressao, prioridade_atual))
-            prioridade_atual += 1
-
-        return expressoes
-
-    def ler_arquivo_entrada(self, nome_arquivo):
-        lexemas = []
-        with open(nome_arquivo, "r") as f:
-            for linha in f:
-                # Remove espaços extras e pula linhas vazias
-                linha = linha.strip()
-                if linha:
-                    # Divide a linha em lexemas separados por espaços
-                    lexemas.extend(linha.split())
-        return lexemas
-
-
     def _processar(self):
         automatos = []
         
         nfa_original_final_state_info = {}
-
-        for token, er, priority in self.expressoes:
+        print(self.expressoes)
+        for priority, token, er in self.expressoes:
             afn = ExpressaoRegular(er).thompson()
             # print(f"AFN for {token} ({priority}): {afn}")
 
@@ -209,8 +174,6 @@ class AnalisadorLexico:
     def print_tabela_de_simbolos(self):
         for lexema, token in self.tabela_de_simbolos.items():
             print(f"<{lexema},{token}>")
-
-
 
     def get_automato_afn(self) -> Automato:
         return self.afn_unificado
