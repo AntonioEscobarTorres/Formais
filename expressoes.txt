@@ -1,0 +1,3 @@
+NUM:a*
+AB_TOKEN:ab
+BnoINICIO:b(a|b)*

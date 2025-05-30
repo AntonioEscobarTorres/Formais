@@ -6,23 +6,23 @@ from ExpressaoRegular import ExpressaoRegular
 class AnalisadorLexico:
   
     def __init__(self):  # (token, regex)
-        self.expressoes = self.ler_expressoes()
+        self.expressoes = self.ler_arquivo_er("/Users/antonio/Formais/expressoes.txt")
         self.token_map = {}  # estado final → token
         self.afn_unificado = None
         self.afd = None
         self._processar()
         self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
-        self.analisar_entrada(self.ler_entrada())
+        self.analisar_entrada(self.ler_arquivo_entrada("/Users/antonio/Formais/testes.txt"))
 
-    def analisar_entrada(self, entrada: str) -> list[tuple[str, str]]:
+    def analisar_entrada(self, entrada: list[str]) -> list[tuple[str, str]]:
         resultado = []
-        palavras = entrada.split()
 
-        for palavra in palavras:
+        for palavra in entrada:
             token = self.reconhecer_token(palavra)
             resultado.append((palavra, token))
 
         return resultado
+
 
     def ler_entrada(self):
         return "aaaaaa ab b baaaaab aaa ab acd"
@@ -33,6 +33,38 @@ class AnalisadorLexico:
                 ("AB_TOKEN", "ab"),
                 ("BnoINICIO", "b(a|b)*")
             ]
+
+    def ler_arquivo_er(self, caminho_arquivo):
+        expressoes = []
+
+        with open(caminho_arquivo, "r") as arquivo:
+            conteudo = arquivo.read()
+
+        # Divide pelas definições separadas por espaço
+        definicoes = conteudo.strip().split()
+
+        for definicao in definicoes:
+            if ':' not in definicao:
+                raise ValueError(f"Definição malformada: {definicao}")
+
+            nome, expressao = definicao.split(":", 1)
+            nome = nome.strip()
+            expressao = expressao.strip()
+
+            expressoes.append((nome, expressao))
+
+        return expressoes
+
+    def ler_arquivo_entrada(self, nome_arquivo):
+        lexemas = []
+        with open(nome_arquivo, "r") as f:
+            for linha in f:
+                # Remove espaços extras e pula linhas vazias
+                linha = linha.strip()
+                if linha:
+                    # Divide a linha em lexemas separados por espaços
+                    lexemas.extend(linha.split())
+        return lexemas
 
 
     def _processar(self):
