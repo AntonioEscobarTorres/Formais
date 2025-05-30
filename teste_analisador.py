@@ -7,10 +7,12 @@ expressoes = [
 ]
 
 
+entrada = "aaaaaa ab b baaaaab aaa ab acd"
+
 
 analisador = AnalisadorLexico(expressoes)
+print(analisador.analisar_entrada(entrada))
 
-print(analisador.reconhecer_token("aaaaaa"))  # Deve retornar NUM
-print(analisador.reconhecer_token("ab"))   # Deve retornar AB_TOKEN
-print(analisador.reconhecer_token("b"))    # Deve retornar "Token não reconhecido"
-print(analisador.reconhecer_token("baaaab"))    # Deve retornar BnoINICIO"
+print(30*"-")
+
+analisador.print_tabela_de_simbolos()

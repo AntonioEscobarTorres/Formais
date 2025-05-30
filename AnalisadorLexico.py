@@ -14,6 +14,18 @@ class AnalisadorLexico:
         self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
 
 
+    def analisar_entrada(self, entrada: str) -> list[tuple[str, str]]:
+        resultado = []
+        palavras = entrada.split()
+
+        for palavra in palavras:
+            token = self.reconhecer_token(palavra)
+            resultado.append((palavra, token))
+
+        return resultado
+
+
+
     def _processar(self):
         automatos = []
         self.token_map = {}  # Certifique-se de inicializar aqui também
@@ -114,6 +126,12 @@ class AnalisadorLexico:
             todas_transicoes,
             alfabeto_total
         )
+
+
+    def print_tabela_de_simbolos(self):
+        for lexema, token in self.tabela_de_simbolos.items():
+            print(f"<{lexema},{token}>")
+
 
 
     def get_automato_afn(self) -> Automato:
