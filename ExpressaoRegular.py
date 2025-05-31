@@ -1,3 +1,4 @@
+import re
 from Automato import Automato
 from Estado import Estado
 from Transicao import Transicao
@@ -15,26 +16,62 @@ class NodoER:
 
 class ExpressaoRegular:
     def __init__(self, er):
-        self.er = er
+        self.er = self.preprocessar_er(er)
         self.simbolos = set()
         self.pos_to_symbol = {}
         self.followpos_table = {}
         self.root = None
 
+    def preprocessar_er(self, er):
+        # Expande [a-z], [A-Z], [0-9] para (a|b|...|z)
+        def expandir_grupo(grupo):
+            chars = []
+            i = 0
+            while i < len(grupo):
+                if i+2 < len(grupo) and grupo[i+1] == '-':
+                    chars.extend([chr(c) for c in range(ord(grupo[i]), ord(grupo[i+2])+1)])
+                    i += 3
+                else:
+                    chars.append(grupo[i])
+                    i += 1
+            return '(' + '|'.join(chars) + ')'
+        # Expande grupos
+        er = re.sub(r'\[([^\]]+)\]', lambda m: expandir_grupo(m.group(1)), er)
+
+        # Expande fecho positivo: expr+ => expr.expr*
+        def expandir_mais(m):
+            expr = m.group(1)
+            # Não adiciona concatenação extra se já for grupo
+            if expr.startswith('(') and expr.endswith(')'):
+                return f"{expr}{expr}*"
+            else:
+                return f"{expr}{expr}*"
+        er = re.sub(r'(\([^\)]+\)|\w)\+', expandir_mais, er)
+
+        # Expande opcional: expr? => (expr|&)
+        def expandir_opcional(m):
+            expr = m.group(1)
+            return f"({expr}|&)"
+        er = re.sub(r'(\([^\)]+\)|\w)\?', expandir_opcional, er)
+
+        return er
+
     def infixa_para_posfixa(self, expr):
         precedencia = {'*': 3, '.': 2, '|': 1}
         output = []
         stack = []
-        # Inserir concatenação explícita de forma robusta
         nova_expr = ""
         prev = None
-        for c in expr:
+        for i, c in enumerate(expr):
             if c == ' ':
                 continue
+            # Adiciona concatenação explícita entre:
+            # símbolo, ')', '*' e símbolo, '('
             if prev:
-                # Se prev é símbolo, ')' ou '*', e c é símbolo ou '(', insere '.'
-                if ((prev not in {'(', '|'} and prev is not None) and
-                    (c not in {'|', ')', '*'})):
+                if (
+                    (prev not in {'(', '|'} and prev is not None and prev not in {'+', '?', '.'})
+                    and (c not in {'|', ')', '*', '+', '?', '.'})
+                ):
                     nova_expr += '.'
             nova_expr += c
             prev = c
@@ -144,7 +181,7 @@ class ExpressaoRegular:
 
     def construir_afd(self):
         # Passo 1: ER para pós-fixa
-        expr = f'({self.er})#'
+        expr = f'({self.er}).#'
         posfixa = self.infixa_para_posfixa(expr)
         # Passo 2: árvore sintática
         self.root, total_pos = self.construir_arvore(posfixa)
@@ -164,11 +201,13 @@ class ExpressaoRegular:
             mapear_posicoes(nodo.esquerda)
             mapear_posicoes(nodo.direita)
         mapear_posicoes(self.root)
+        # Debug: mostrar posições e símbolos
+        print("[DEBUG] pos_to_symbol:", self.pos_to_symbol)
         # Passo 5: Construção do AFD
         estados = []
         estados_map = {}
         fila = []
-        transicoes = []  # Nova lista para armazenar as transições
+        transicoes = []
         estado_inicial = frozenset(self.root.firstpos)
         estados.append(estado_inicial)
         estados_map[estado_inicial] = Estado(str(estado_inicial))
@@ -177,13 +216,14 @@ class ExpressaoRegular:
         while fila:
             atual = fila.pop(0)
             estado_atual = estados_map[atual]
-            if any(self.pos_to_symbol[p] == '#' for p in atual):
+            # Corrigido: garantir que '#' está presente e marcar finais corretamente
+            if any(self.pos_to_symbol.get(p) == '#' for p in atual):
                 estado_atual.final = True
                 finais.add(estado_atual)
             for simbolo in self.simbolos:
                 prox = set()
                 for p in atual:
-                    if self.pos_to_symbol[p] == simbolo:
+                    if self.pos_to_symbol.get(p) == simbolo:
                         prox.update(self.followpos_table.get(p, set()))
                 if prox:
                     prox_frozen = frozenset(prox)
@@ -195,12 +235,12 @@ class ExpressaoRegular:
                     else:
                         novo_estado = estados_map[prox_frozen]
                     trans = Transicao(estado_atual, simbolo, novo_estado)
-                    transicoes.append(trans)  # Armazene aqui
+                    transicoes.append(trans)
         automato = Automato(
-            len(estados_map),  # n_estados
-            estados_map[estado_inicial],  # inicial
-            finais,  # finais (set de Estado)
-            set(transicoes),  # transicoes (set de Transicao)
-            self.simbolos  # alfabeto (set de str)
+            len(estados_map),
+            estados_map[estado_inicial],
+            finais,
+            set(transicoes),
+            self.simbolos
         )
         return automato
