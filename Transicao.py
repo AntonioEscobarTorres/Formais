@@ -1,34 +1,31 @@
 from Estado import Estado
 
+    # Representa uma transição entre dois estados em um autômato,
+    # Ativada por um símbolo específico.
 class Transicao:
+
+    # Inicializa uma transição com estado de 
+    # origem, símbolo de transição e estado de destino.
     def __init__(self, origem: Estado, simbolo: str, destino: Estado):
         self.origem = origem
         self.simbolo = simbolo
         self.destino = destino
 
+    # Retorna o símbolo da transição
     def get_simbolo(self) -> str:
         return self.simbolo
-
+    # Retorna o estado de origem da transição
     def get_origem(self) -> Estado:
         return self.origem
-
+    # Retorna o estado destino da transição
     def get_destino(self) -> Estado:
         return self.destino
 
+
+    # Retorna uma representação legível da transição, com o símbolo em amarelo.
+    # Útil para impressão no terminal.
     def __str__(self):
         AMARELO = '\033[93m'
         RESET = '\033[0m'
         return f"{self.origem.get_estado()},{AMARELO}{self.simbolo}{RESET},{self.destino.get_estado()}"
 
-    def __repr__(self):
-        return f"Transicao(Estado('{self.origem.get_estado()}'), '{self.simbolo}', Estado('{self.destino.get_estado()}'))"
-
-    def __eq__(self, other):
-        if isinstance(other, Transicao):
-            return self.origem == other.origem and \
-                   self.simbolo == other.simbolo and \
-                   self.destino == other.destino
-        return False
-
-    def __hash__(self):
-        return hash((self.origem, self.simbolo, self.destino))

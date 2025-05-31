@@ -7,14 +7,23 @@ from LeitorDeEr import LeitorDeEr
 class AnalisadorLexico:
   
     def __init__(self):  # (token, regex)
+        
+        # Lê expressões regulares com seus respectivos tokens e prioridades a partir de um arquivo
         self.expressoes = LeitorDeEr.ler_arquivo_er("./expressoes.txt")
         self.token_map = {}  # estado final → token
         self.afn_unificado = None
         self.afd = None
+
+        # Processa todas as expressões para gerar o autômato final
         self._processar()
+
+        # Associa cada palavra lida ao seu token correspondente
         self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
         self.analisar_entrada(LeitorDeEr.ler_arquivo_entrada("./testes.txt"))
 
+
+    
+    # Analisa uma lista de palavras e retorna uma lista com seus respectivos tokens reconhecidos
     def analisar_entrada(self, entrada: list[str]) -> list[tuple[str, str]]:
         resultado = []
 
@@ -24,25 +33,16 @@ class AnalisadorLexico:
 
         return resultado
 
-    def ler_entrada(self):
-        return "aaaaaa ab b baaaaab aaa ab acd"
-
-    def ler_expressoes(self):
-        return [
-                ("NUM", "a*"),
-                ("AB_TOKEN", "ab"),
-                ("BnoINICIO", "b(a|b)*")
-            ]
-
     def _processar(self):
+        # Processa todas as expressões regulares e constrói o AFD final
         automatos = []
         
         nfa_original_final_state_info = {}
         print(self.expressoes)
         for priority, token, er in self.expressoes:
             afn = ExpressaoRegular(er).thompson()
-            # print(f"AFN for {token} ({priority}): {afn}")
-
+            
+            # Armazena o token e sua prioridade para os estados finais do AFN
             for estado_final_nfa in afn.get_finais():
                 nfa_state_name = estado_final_nfa.get_estado()
                 if nfa_state_name not in nfa_original_final_state_info or \
@@ -51,25 +51,26 @@ class AnalisadorLexico:
             
             automatos.append((token, afn))
 
+        # Cria um AFN unificado pela união via transição-ε
         self.afn_unificado = self.uniao_via_etransicao(automatos)
-        # print(f"AFN Unificado: {self.afn_unificado}")
-
+        
+        # Prepara o mapeamento de estados finais para tokens, removendo a prioridade    
         temp_nfa_map_for_determinize = {
             state: info[0] for state, info in nfa_original_final_state_info.items()
         }
         
+        # Determiniza o AFN unificado e obtém o AFD e uma tabela parcial de tokens
         self.afd, tabela_de_tokens_do_determinizar = self.afn_unificado.determinizar(temp_nfa_map_for_determinize) 
         print(f"AFD: {self.afd}")
         print(f"Tabela de tokens (from determinizar): {tabela_de_tokens_do_determinizar}")
 
         final_prioritized_afd_token_map = {}
         
-        #print(f"[DEBUG _processar] Nomes dos estados finais do AFD: {[s.get_estado() for s in self.afd.get_finais()]}")
-        #print(f"[DEBUG _processar] Conteúdo de nfa_original_final_state_info: {nfa_original_final_state_info}")
-
+        
+        # Resolve conflitos de estados finais no AFD usando a menor prioridade como critério
         for afd_final_state_obj in self.afd.get_finais():
             afd_state_name_str = afd_final_state_obj.get_estado()
-            #print(f"[DEBUG _processar] Processando estado final do AFD: {afd_state_name_str}")
+            
             
             component_unified_nfa_state_names = afd_state_name_str.split(',')
             
@@ -81,32 +82,31 @@ class AnalisadorLexico:
                 
                 original_nfa_name_candidate = unified_nfa_name_component
 
+                # Remove prefixos como T0_, T1_ etc. dos nomes dos estados
                 if '_' in unified_nfa_name_component:
                     parts = unified_nfa_name_component.split('_', 1)
                     if len(parts) > 1 and parts[0].startswith('T') and parts[0][1:].isdigit():
                         original_nfa_name_candidate = parts[1]
                 
-                #print(f"[DEBUG _processar]   Componente unificado: {unified_nfa_name_component}, Candidato original: {original_nfa_name_candidate}")
+                
                 
                 if original_nfa_name_candidate in nfa_original_final_state_info:
                     token_candidate, priority_candidate = nfa_original_final_state_info[original_nfa_name_candidate]
-                    #print(f"[DEBUG _processar]     Encontrado em nfa_original_final_state_info: Token={token_candidate}, Prioridade={priority_candidate}")
+                    
                     
                     if priority_candidate < highest_priority_value:
                         highest_priority_value = priority_candidate
                         best_token_for_afd_state = token_candidate
-                        #print(f"[DEBUG _processar]       Novo melhor token para {afd_state_name_str}: {best_token_for_afd_state} (Prioridade: {highest_priority_value})")
+                        
 
             if best_token_for_afd_state is not None:
                 final_prioritized_afd_token_map[afd_state_name_str] = best_token_for_afd_state
-                #print(f"[DEBUG _processar] Mapeado estado AFD '{afd_state_name_str}' para token '{best_token_for_afd_state}'")
-            #else:
-                #print(f"[DEBUG _processar] Nenhum token encontrado para o estado AFD '{afd_state_name_str}'")
-        
+                
         self.token_map = final_prioritized_afd_token_map
-        #print(f"Token map final (prioritized): {self.token_map}") 
+
 
     def reconhecer_token(self, palavra: str) -> str:
+        # Simula a leitura da palavra no AFD para encontrar o token correspondente
         estado_atual = self.afd.get_inicial()
         print(f"[DEBUG] Estado inicial: {estado_atual.estado}")
 
@@ -132,6 +132,7 @@ class AnalisadorLexico:
 
 
     def uniao_via_etransicao(self, automatos: list[Automato]):
+        # Realiza a união dos AFNs via transição-ε, renomeando estados para evitar conflitos
         novo_estado_inicial = Estado("inicial")
         todos_estados = {novo_estado_inicial}
         todas_transicoes = set()
@@ -140,17 +141,17 @@ class AnalisadorLexico:
 
         for i, (token, afn) in enumerate(automatos):
             prefixo = f"T{i}"
+            # Renomeia os estados do AFN para garantir unicidade
             estados_renomeados = {
                 estado: Estado(f"{prefixo}_{estado}") for estado in afn.get_estados()
             }
-
             todos_estados.update(estados_renomeados.values())
             for transicao in afn.get_transicoes():
                 origem = estados_renomeados[transicao.get_origem()]
                 destino = estados_renomeados[transicao.get_destino()]
                 simbolo = transicao.get_simbolo()
                 todas_transicoes.add(Transicao(origem, simbolo, destino))
-
+            # Conecta o novo estado inicial à inicial do AFN via ε
             todas_transicoes.add(
                 Transicao(novo_estado_inicial, '&', estados_renomeados[afn.get_inicial()])
             )
@@ -172,6 +173,7 @@ class AnalisadorLexico:
 
 
     def print_tabela_de_simbolos(self):
+        # Imprime a tabela de símbolos gerada após a análise léxica
         for lexema, token in self.tabela_de_simbolos.items():
             print(f"<{lexema},{token}>")
 
