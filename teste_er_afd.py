@@ -1,13 +1,27 @@
 from ExpressaoRegular import ExpressaoRegular
 
-def simular_afd(afd, palavra):
-    estado = afd.get_inicial()
-    for simbolo in palavra:
-        transicoes = [t for t in afd.get_transicoes() if t.get_origem() == estado and t.get_simbolo() == simbolo]
-        if not transicoes:
-            return False
-        estado = transicoes[0].get_destino()
-    return estado in afd.get_finais()
+
+def exportar_afd(afd, arquivo=None):
+    estados = list(afd.get_estados())
+    estados_idx = {estado: idx for idx, estado in enumerate(estados)}
+    finais = [str(estados_idx[e]) for e in afd.get_finais()]
+    inicial = estados_idx[afd.get_inicial()]
+    alfabeto = sorted(afd.get_alfabeto())
+    transicoes = []
+    for t in afd.get_transicoes():
+        origem = estados_idx[t.get_origem()]
+        destino = estados_idx[t.get_destino()]
+        simbolo = t.get_simbolo()
+        transicoes.append(f"{origem},{simbolo},{destino}")
+    linhas = [
+        str(len(estados)),
+        str(inicial),
+        ",".join(finais),
+        ",".join(alfabeto),
+        *transicoes
+    ]
+    saida = "\n".join(linhas)
+    print(saida)
 
 if __name__ == "__main__":
     exemplos = [
@@ -24,15 +38,5 @@ if __name__ == "__main__":
         print(f"\n=== Testando ER: '{er}' ===")
         exp = ExpressaoRegular(er)
         afd = exp.construir_afd()
-        print("Estados do AFD:")
-        for estado in afd.get_estados():
-            print(estado)
-        print("Transições:")
-        for t in afd.get_transicoes():
-            print(f"{t.get_origem()} --{t.get_simbolo()}--> {t.get_destino()}")
-        print("Estado inicial:", afd.get_inicial().get_estado())
-        print("Estados finais:", [estado.get_estado() for estado in afd.get_finais()])
 
-        for palavra in testes:
-            resultado = simular_afd(afd, palavra)
-            print(f"'{palavra}': {'ACEITA' if resultado else 'REJEITA'}")
+        exportar_afd(afd)

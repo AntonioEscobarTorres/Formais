@@ -201,8 +201,7 @@ class ExpressaoRegular:
             mapear_posicoes(nodo.esquerda)
             mapear_posicoes(nodo.direita)
         mapear_posicoes(self.root)
-        # Debug: mostrar posições e símbolos
-        print("[DEBUG] pos_to_symbol:", self.pos_to_symbol)
+    
         # Passo 5: Construção do AFD
         estados = []
         estados_map = {}
