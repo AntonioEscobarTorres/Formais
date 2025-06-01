@@ -1,7 +1,7 @@
 import re
-from Automato import Automato
-from Estado import Estado
-from Transicao import Transicao
+from src.Automato import Automato
+from src.Estado import Estado
+from src.Transicao import Transicao
 
 class NodoER:
     def __init__(self, valor, esquerda=None, direita=None):
@@ -11,8 +11,8 @@ class NodoER:
         self.nullable = False
         self.firstpos = set()
         self.lastpos = set()
-        self.pos = None  # Só para folhas
-        self.followpos = set()  # Só para folhas
+        self.pos = None
+        self.followpos = set()
 
 class ExpressaoRegular:
     def __init__(self, er):
@@ -225,7 +225,6 @@ class ExpressaoRegular:
         while fila:
             atual = fila.pop(0)
             estado_atual = estados_map[atual]
-            # Corrigido: garantir que '#' está presente e marcar finais corretamente
             if any(self.pos_to_symbol.get(p) == '#' for p in atual):
                 estado_atual.final = True
                 finais.add(estado_atual)

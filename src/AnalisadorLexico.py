@@ -1,15 +1,15 @@
-from Estado import Estado
-from Transicao import Transicao
-from Automato import Automato
-from ExpressaoRegular import ExpressaoRegular
-from LeitorDeEr import LeitorDeEr
+from src.Estado import Estado
+from src.Transicao import Transicao
+from src.Automato import Automato
+from src.ExpressaoRegular import ExpressaoRegular
+from src.LeitorDeEr import LeitorDeEr
 
 class AnalisadorLexico:
   
-    def __init__(self):  # (token, regex)
+    def __init__(self):
         
         # Lê expressões regulares com seus respectivos tokens e prioridades a partir de um arquivo
-        self.expressoes = LeitorDeEr.ler_arquivo_er("./expressoes.txt")
+        self.expressoes = LeitorDeEr.ler_arquivo_er("./Testes/expressoes.txt")
         self.token_map = {}  # estado final → token
         self.afn_unificado = None
         self.afd = None
@@ -19,9 +19,7 @@ class AnalisadorLexico:
 
         # Associa cada palavra lida ao seu token correspondente
         self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
-        self.analisar_entrada(LeitorDeEr.ler_arquivo_entrada("./testes.txt"))
-
-
+        self.analisar_entrada(LeitorDeEr.ler_arquivo_entrada("./Testes/testes.txt"))
     
     # Analisa uma lista de palavras e retorna uma lista com seus respectivos tokens reconhecidos
     def analisar_entrada(self, entrada: list[str]) -> list[tuple[str, str]]:
@@ -38,7 +36,6 @@ class AnalisadorLexico:
         automatos = []
         
         nfa_original_final_state_info = {}
-        print(self.expressoes)
         for priority, token, er in self.expressoes:
             afn = ExpressaoRegular(er).construir_afd()
             afn_index = len(automatos)
@@ -59,16 +56,16 @@ class AnalisadorLexico:
         
         # Determiniza o AFN unificado e obtém o AFD e uma tabela parcial de tokens
         self.afd, tabela_de_tokens_do_determinizar = self.afn_unificado.determinizar(temp_nfa_map_for_determinize) 
-        print(f"AFD: {self.afd}")
-        print(f"Tabela de tokens (from determinizar): {tabela_de_tokens_do_determinizar}")
+        print("------------------------------")
+        print("Tabela de tokens (determinizada):")
+        print(f"{tabela_de_tokens_do_determinizar}")
 
         final_prioritized_afd_token_map = {}
-        
         
         # Resolve conflitos de estados finais no AFD usando a menor prioridade como critério
         for afd_final_state_obj in self.afd.get_finais():
             afd_state_name_str = afd_final_state_obj.get_estado()
-            component_unified_nfa_state_names = afd_state_name_str.split(',')
+            component_unified_nfa_state_names = afd_state_name_str.split(';')
             best_token_for_afd_state = None
             highest_priority_value = float('inf')
             for unified_nfa_name_component in component_unified_nfa_state_names:
@@ -81,24 +78,21 @@ class AnalisadorLexico:
             if best_token_for_afd_state is not None:
                 final_prioritized_afd_token_map[afd_state_name_str] = best_token_for_afd_state
         self.token_map = final_prioritized_afd_token_map
-        print(self.token_map)
-
 
     def reconhecer_token(self, palavra: str) -> str:
-        print(self.token_map)
         # Simula a leitura da palavra no AFD para encontrar o token correspondente
         estado_atual = self.afd.get_inicial()
-        print(f"[DEBUG] Estado inicial: {estado_atual.estado}")
+        #print(f"[DEBUG] Estado inicial: {estado_atual.estado}")
 
         for simbolo in palavra:
-            print(f"[DEBUG] Lendo símbolo: {simbolo}")
+            #print(f"[DEBUG] Lendo símbolo: {simbolo}")
             transicoes = [t for t in self.afd.get_transicoes()
                         if t.get_origem() == estado_atual and t.get_simbolo() == simbolo]
             if not transicoes:
                 print("[DEBUG] Nenhuma transição encontrada")
                 return "Token não reconhecido"
             estado_atual = transicoes[0].get_destino()
-            print(f"[DEBUG] Novo estado: {estado_atual.estado}")
+            #print(f"[DEBUG] Novo estado: {estado_atual.estado}")
 
         if estado_atual in self.afd.get_finais():
 
@@ -161,6 +155,38 @@ class AnalisadorLexico:
 
     def get_automato_afd(self) -> Automato:
         return self.afd
+
+    def salvar_AFD(self, nome_arquivo="afd_salvo.txt"):
+        if self.afd is None:
+            print("Erro: O AFD não foi gerado ou é None. Nada para salvar.")
+            return
+        try:
+            with open(nome_arquivo, 'w', encoding='utf-8') as arquivo:
+                arquivo.write(str(self.afd))
+            print(f"AFD salvo com sucesso no arquivo '{nome_arquivo}'")
+
+        except Exception as e:
+            print(f"Ocorreu um erro ao tentar salvar o AFD no arquivo: {e}")
+
+    def salvar_tabela_de_simbolos(self, nome_arquivo="tabela_de_simbolos_salvo.txt"):
+        if not self.tabela_de_simbolos.items:
+            print(f"Aviso: Tabela de símbolos está vazia. O arquivo '{nome_arquivo}' será criado vazio ou não será modificado se já existir vazio.")
+            try:
+                with open(nome_arquivo, 'w', encoding='utf-8') as arquivo:
+                    pass
+                print(f"Arquivo '{nome_arquivo}' preparado (tabela de símbolos vazia).")
+            except Exception as e:
+                print(f"Ocorreu um erro ao tentar criar/truncar o arquivo '{nome_arquivo}': {e}")
+            return
+
+        try:
+            with open(nome_arquivo, 'w', encoding='utf-8') as arquivo:
+                for lexema, token in self.tabela_de_simbolos.items():
+                    arquivo.write(f"<{lexema},{token}>\n")
+            print(f"Tabela de símbolos salva com sucesso no arquivo '{nome_arquivo}'")
+
+        except Exception as e:
+            print(f"Ocorreu um erro ao tentar salvar a tabela de símbolos no arquivo: {e}")
 
     def __str__(self):
         return str(self.afd)

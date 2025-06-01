@@ -1,6 +1,6 @@
-from Estado import Estado
-from Transicao import Transicao
-from Automato import Automato
+from src.Estado import Estado
+from src.Transicao import Transicao
+from src.Automato import Automato
 
 
 #_______________________________#
@@ -39,8 +39,6 @@ A_plus = Automato(
     transicoes={t1, t2},
     alfabeto={'a'}
 )
-
-
 
 def uniao_via_etransicao(automatos = list[Automato]):
 
@@ -87,7 +85,6 @@ def uniao_via_etransicao(automatos = list[Automato]):
         todas_transicoes,
         alfabeto_total
     )
-
 
 automatos_teste_uniao = [A_plus, B_plus]
 automato_unido = uniao_via_etransicao(automatos_teste_uniao)

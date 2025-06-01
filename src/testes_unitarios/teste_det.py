@@ -1,6 +1,6 @@
-from Estado import Estado
-from Transicao import Transicao
-from Automato import Automato
+from src.Estado import Estado
+from src.Transicao import Transicao
+from src.Automato import Automato
 
 # Estados
 q0 = Estado("q0")

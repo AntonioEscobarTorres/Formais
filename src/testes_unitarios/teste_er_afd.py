@@ -1,6 +1,5 @@
 from ExpressaoRegular import ExpressaoRegular
 
-
 def exportar_afd(afd, arquivo=None):
     estados = list(afd.get_estados())
     estados_idx = {estado: idx for idx, estado in enumerate(estados)}

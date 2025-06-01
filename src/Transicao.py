@@ -1,4 +1,4 @@
-from Estado import Estado
+from src.Estado import Estado
 
     # Representa uma transição entre dois estados em um autômato,
     # Ativada por um símbolo específico.
@@ -21,11 +21,8 @@ class Transicao:
     def get_destino(self) -> Estado:
         return self.destino
 
-
     # Retorna uma representação legível da transição, com o símbolo em amarelo.
     # Útil para impressão no terminal.
     def __str__(self):
-        AMARELO = '\033[93m'
-        RESET = '\033[0m'
-        return f"{self.origem.get_estado()},{AMARELO}{self.simbolo}{RESET},{self.destino.get_estado()}"
+        return f"{self.origem.get_estado()},{self.simbolo},{self.destino.get_estado()}"
 

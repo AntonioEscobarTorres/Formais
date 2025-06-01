@@ -1,5 +1,4 @@
-from AnalisadorLexico import AnalisadorLexico
-
+from src.AnalisadorLexico import AnalisadorLexico
 
 analisador = AnalisadorLexico()
 

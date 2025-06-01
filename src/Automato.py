@@ -1,10 +1,9 @@
-from Estado import Estado
-from Transicao import Transicao
+from src.Estado import Estado
+from src.Transicao import Transicao
 from typing import Set
 from collections import deque
 
 class Automato:
-
 
     # Inicializa o autômato com número de estados, estado inicial, estados finais,
     # conjunto de transições e alfabeto.
@@ -16,7 +15,6 @@ class Automato:
         self.finais = finais
         self.transicoes = transicoes
         self.alfabeto = alfabeto
-
 
     # Calcula o ε-fecho de um estado, ou seja, o conjunto de estados 
     # alcançáveis apenas por transições ε ("&").
@@ -30,13 +28,12 @@ class Automato:
         visited = {estadoInicial} 
         stack = [estadoInicial]    
 
-
         # Enquanto houver estados a explorar na pilha:
-        # - remove o estado do topo da pilha,
-        # - percorre todas as transições do autômato,
-        # - se encontrar uma transição ε (representada por "&") a partir do estado atual,
-        #   e o estado destino ainda não tiver sido visitado,
-        #   adiciona-o ao conjunto de visitados e empilha para exploração futura.
+        # remove o estado do topo da pilha,
+        # percorre todas as transições do autômato,
+        # se encontrar uma transição ε (representada por "&") a partir do estado atual,
+        # e o estado destino ainda não tiver sido visitado,
+        # adiciona-o ao conjunto de visitados e empilha para exploração futura.
         while stack:
             estadoAtualPilha = stack.pop()
             
@@ -48,8 +45,6 @@ class Automato:
         # Retorna o conjunto de estados alcançáveis por 
         # transições ε a partir do estado inicial.
         return visited
-
-
 
     # Gera um nome único para um conjunto de
     # estados (útil para estados compostos do DFA).
@@ -64,7 +59,7 @@ class Automato:
                 print(f"[WARN gerar_nome] Non-string state name found: {name!r} from {estado!r}. Converting to str.")
                 name = str(name)
             state_names.append(name)
-        return ','.join(sorted(state_names))
+        return ';'.join(sorted(state_names))
 
     # Verifica se algum estado no conjunto é um estado final do NFA.
     def contem_final(self, conjunto_nfa_estados: set[Estado]) -> bool:
@@ -74,7 +69,6 @@ class Automato:
             if nfa_estado_in_set in self.finais: 
                 return True
         return False
-
 
     # Calcula os estados alcançáveis por um determinado símbolo a partir
     # de um conjunto de estados e retorna o ε-fecho desses destinos.
@@ -97,7 +91,6 @@ class Automato:
         # Retorna o conjunto de estados acessíveis a partir do conjunto atual,
         # por uma transição com o símbolo dado seguida de zero ou mais ε-transições.
         return fecho_final_destinos
-
 
     # Constrói um autômato determinístico (DFA) a partir do autômato atual (NFA).
     # Se token_map_afn for fornecido, associa os tokens aos estados finais do DFA.
@@ -132,7 +125,6 @@ class Automato:
         token_map_afd = {} if token_map_afn is not None else None
         
         conjuntos_nfa_processados_nomes = {nome_inicial_dfa}
-
 
         # Loop principal: construção dos estados e transições do AFD
         while fila_conjuntos_nfa:
@@ -175,7 +167,6 @@ class Automato:
                     destino_obj_dfa = map_nome_dfa_para_obj_estado_dfa[nome_proximo_dfa]
                     nova_transicao_dfa = Transicao(origem_obj_dfa, simbolo, destino_obj_dfa)
                     transicoes_dfa.add(nova_transicao_dfa)
-        
 
         # A partir daqui, montagem final do AFD a partir das estruturas criadas
         finais_obj_dfa = {map_nome_dfa_para_obj_estado_dfa[nome] for nome in nomes_finais_dfa}
@@ -192,30 +183,27 @@ class Automato:
             return afd, token_map_afd
         return afd
 
-    # Retorna uma representação textual do autômato, útil para depuração e exibição.
     def __str__(self):
         inicial_str = "None" if self.inicial is None else self.inicial.get_estado()
         
-        finais_str = ', '.join(sorted(str(estado.get_estado()) for estado in self.finais))
+        finais_str = '; '.join(sorted(str(estado.get_estado()) for estado in self.finais))
         sorted_transicoes = sorted(
             list(self.transicoes), 
             key=lambda t: (
-                t.get_origem().get_estado() if t.get_origem() else "", 
+                t.get_origem().get_estado() if t.get_origem() else "",
                 t.get_simbolo(), 
                 t.get_destino().get_estado() if t.get_destino() else ""
             )
         )
-        transicoes_str = '\n'.join(f'  {str(transicao)}' for transicao in sorted_transicoes)
+        transicoes_str = '\n'.join(f'{str(transicao)}' for transicao in sorted_transicoes)
         alfabeto_str = ', '.join(sorted(self.alfabeto))
 
         return (
-            "\n=== AUTÔMATO ===\n"
-            f"Estado Inicial: {{{inicial_str}}}\n"
-            f"Estados Finais: {{ {finais_str} }}\n"
-            f"Alfabeto: {{{alfabeto_str}}}\n"
-            "Transições:\n"
+            f"{self.get_numero_de_estados()}\n"
+            f"{inicial_str}\n"
+            f"{finais_str}\n"
+            f"{alfabeto_str}\n"
             f"{transicoes_str}\n"
-            "=================\n"
         )
 
     # Retorna o conjunto de todos os estados usados no autômato.
@@ -230,6 +218,10 @@ class Automato:
             if transicao.get_destino():
                  estados.add(transicao.get_destino())
         return estados
+
+    def get_numero_de_estados(self) -> int:
+        conjunto_de_estados = self.get_estados()
+        return len(conjunto_de_estados)
 
     def get_transicoes(self):
         return self.transicoes

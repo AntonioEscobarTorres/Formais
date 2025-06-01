@@ -13,7 +13,7 @@ class LeitorDeEr:
             r'\[a-z\]': '(' + '|'.join(lower_alpha_chars) + ')',
             r'\[A-Z\]': '(' + '|'.join(upper_alpha_chars) + ')',
             r'\[a-zA-Z\]': '(' + '|'.join(lower_alpha_chars + upper_alpha_chars) + ')',
-            r'\[A-Za-z\]': '(' + '|'.join(upper_alpha_chars + lower_alpha_chars) + ')', # Ordem alternativa
+            r'\[A-Za-z\]': '(' + '|'.join(upper_alpha_chars + lower_alpha_chars) + ')',
             r'\[0-9\]': '(' + '|'.join(digit_chars) + ')',
             r'\[1-9\]': '(' + '|'.join(digits_1_9_chars) + ')',
         }
@@ -64,7 +64,6 @@ class LeitorDeEr:
         lexemas = []
         with open(nome_arquivo, "r") as f:
             for linha in f:
-                # Remove espaços extras e pula linhas vazias
                 linha = linha.strip()
                 if linha:
                     # Divide a linha em lexemas separados por espaços

@@ -1,2 +1,0 @@
-num:a(ab)*
-id:[a-zA-Z]([a-zA-Z]|[0-9])*
