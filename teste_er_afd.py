@@ -26,17 +26,18 @@ def exportar_afd(afd, arquivo=None):
 if __name__ == "__main__":
     exemplos = [
         # (Expressão regular, [palavras de teste])
-        ("a|b*", ["", "a", "b", "bb", "ab", "ba", "aaa"]),
-        ("ab*", ["a", "ab", "abb", "b", "", "ba", "aab"]),
-        ("(a|b)c", ["ac", "bc", "cc", "abc", "c", "a", "b"]),
-        ("(a|b)*abb", ["abb", "aabb", "babb", "ababb", "ab", "aab", "bba"]),
-        ("a*b*", ["", "a", "b", "aa", "bb", "ab", "ba", "aabbb"]),
-        ("(ab)*", ["", "ab", "abab", "a", "b", "aba", "abb"]),
+        ("a(ab)*", ["", "aab", "b", "bb", "ab", "ba", "aaaaaa"]),
     ]
 
     for er, testes in exemplos:
         print(f"\n=== Testando ER: '{er}' ===")
         exp = ExpressaoRegular(er)
         afd = exp.construir_afd()
+        print("Estados finais do AFD:", [str(e) for e in afd.get_finais()])
+        print("Transições do AFD:")
+        for t in afd.get_transicoes():
+            print(f"{t.get_origem()} --{t.get_simbolo()}--> {t.get_destino()}")
+        for palavra in testes:
+            print(f"Palavra: '{palavra}' - Aceita: {afd.aceita(palavra)}")
 
         exportar_afd(afd)

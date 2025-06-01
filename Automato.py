@@ -242,3 +242,12 @@ class Automato:
 
     def get_alfabeto(self):
         return self.alfabeto
+    
+    def aceita(self, palavra: str) -> bool:
+        estado_atual = self.inicial
+        for simbolo in palavra:
+            transicoes = [t for t in self.transicoes if t.get_origem() == estado_atual and t.get_simbolo() == simbolo]
+            if not transicoes:
+                return False
+            estado_atual = transicoes[0].get_destino()
+        return estado_atual in self.finais

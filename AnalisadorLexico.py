@@ -41,14 +41,12 @@ class AnalisadorLexico:
         print(self.expressoes)
         for priority, token, er in self.expressoes:
             afn = ExpressaoRegular(er).construir_afd()
-            
-            # Armazena o token e sua prioridade para os estados finais do AFN
+            afn_index = len(automatos)
             for estado_final_nfa in afn.get_finais():
-                nfa_state_name = estado_final_nfa.get_estado()
+                nfa_state_name = f"T{afn_index}_{estado_final_nfa.get_estado()}"
                 if nfa_state_name not in nfa_original_final_state_info or \
                    priority < nfa_original_final_state_info[nfa_state_name][1]:
                     nfa_original_final_state_info[nfa_state_name] = (token, priority)
-            
             automatos.append((token, afn))
 
         # Cria um AFN unificado pela união via transição-ε
@@ -70,42 +68,24 @@ class AnalisadorLexico:
         # Resolve conflitos de estados finais no AFD usando a menor prioridade como critério
         for afd_final_state_obj in self.afd.get_finais():
             afd_state_name_str = afd_final_state_obj.get_estado()
-            
-            
             component_unified_nfa_state_names = afd_state_name_str.split(',')
-            
             best_token_for_afd_state = None
             highest_priority_value = float('inf')
-
             for unified_nfa_name_component in component_unified_nfa_state_names:
                 unified_nfa_name_component = unified_nfa_name_component.strip()
-                
-                original_nfa_name_candidate = unified_nfa_name_component
-
-                # Remove prefixos como T0_, T1_ etc. dos nomes dos estados
-                if '_' in unified_nfa_name_component:
-                    parts = unified_nfa_name_component.split('_', 1)
-                    if len(parts) > 1 and parts[0].startswith('T') and parts[0][1:].isdigit():
-                        original_nfa_name_candidate = parts[1]
-                
-                
-                
-                if original_nfa_name_candidate in nfa_original_final_state_info:
-                    token_candidate, priority_candidate = nfa_original_final_state_info[original_nfa_name_candidate]
-                    
-                    
+                if unified_nfa_name_component in nfa_original_final_state_info:
+                    token_candidate, priority_candidate = nfa_original_final_state_info[unified_nfa_name_component]
                     if priority_candidate < highest_priority_value:
                         highest_priority_value = priority_candidate
                         best_token_for_afd_state = token_candidate
-                        
-
             if best_token_for_afd_state is not None:
                 final_prioritized_afd_token_map[afd_state_name_str] = best_token_for_afd_state
-                
         self.token_map = final_prioritized_afd_token_map
+        print(self.token_map)
 
 
     def reconhecer_token(self, palavra: str) -> str:
+        print(self.token_map)
         # Simula a leitura da palavra no AFD para encontrar o token correspondente
         estado_atual = self.afd.get_inicial()
         print(f"[DEBUG] Estado inicial: {estado_atual.estado}")
@@ -122,7 +102,6 @@ class AnalisadorLexico:
 
         if estado_atual in self.afd.get_finais():
 
-            print(f"[DEBUG] Estado final alcançado: {estado_atual.estado}")
 
             self.tabela_de_simbolos[palavra] = self.token_map.get(estado_atual.estado, "Token desconhecido")
 
