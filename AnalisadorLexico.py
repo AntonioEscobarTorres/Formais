@@ -40,7 +40,7 @@ class AnalisadorLexico:
         nfa_original_final_state_info = {}
         print(self.expressoes)
         for priority, token, er in self.expressoes:
-            afn = ExpressaoRegular(er).thompson()
+            afn = ExpressaoRegular(er).construir_afd()
             
             # Armazena o token e sua prioridade para os estados finais do AFN
             for estado_final_nfa in afn.get_finais():

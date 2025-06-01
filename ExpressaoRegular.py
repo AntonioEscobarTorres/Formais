@@ -208,8 +208,18 @@ class ExpressaoRegular:
         fila = []
         transicoes = []
         estado_inicial = frozenset(self.root.firstpos)
+        state_name_counter = 0
+        frozenset_to_name = {}
+
+        def get_state_name(fset):
+            nonlocal state_name_counter
+            if fset not in frozenset_to_name:
+                frozenset_to_name[fset] = f"qU{state_name_counter}"
+                state_name_counter += 1
+            return frozenset_to_name[fset]
+
         estados.append(estado_inicial)
-        estados_map[estado_inicial] = Estado(str(estado_inicial))
+        estados_map[estado_inicial] = Estado(get_state_name(estado_inicial))
         fila.append(estado_inicial)
         finais = set()
         while fila:
@@ -227,7 +237,7 @@ class ExpressaoRegular:
                 if prox:
                     prox_frozen = frozenset(prox)
                     if prox_frozen not in estados_map:
-                        novo_estado = Estado(str(prox_frozen))
+                        novo_estado = Estado(get_state_name(prox_frozen))
                         estados_map[prox_frozen] = novo_estado
                         estados.append(prox_frozen)
                         fila.append(prox_frozen)
