@@ -71,3 +71,79 @@ class Gramatica:
                         mudou = True
 
         return first
+
+
+    def calcular_follow(self):
+        # Inicializa o conjunto FOLLOW para cada não terminal como um conjunto vazio
+        follow = {nt: set() for nt in self.nao_terminais}
+        
+        # Regra 1: adiciona $ ao FOLLOW do símbolo inicial
+        follow[self.inicial].add('$')
+
+        # Calcula o conjunto FIRST para uso posterior
+        first = self.calcular_first() 
+
+        mudou = True
+        while mudou:
+            mudou = False
+
+            for producao in self.producoes:
+                cabeca = producao.obter_cabeca()  
+                corpo = producao.obter_corpo()    
+
+                for i in range(len(corpo)):
+                    simbolo = corpo[i]
+
+                    # Só aplicamos regras de FOLLOW para não terminais
+                    if simbolo.obter_tipo() != TipoSimbolo.naoTerminal:
+                        continue
+
+                    B = simbolo.obter_nome()
+
+                    # Regra 2: A ::= α B β → tudo que está em FIRST(β) vai para FOLLOW(B)
+                    if i + 1 < len(corpo):  # Existe β
+                        beta = corpo[i+1:]  
+                        
+                        # Calcula FIRST(β)
+                        first_beta = set()
+                        epsilon_em_tudo = True
+
+                        for s in beta:
+                            tipo = s.obter_tipo()
+                            nome = s.obter_nome()
+
+                            if tipo == TipoSimbolo.terminal:
+                                first_beta.add(nome)
+                                epsilon_em_tudo = False
+                                break
+
+                            elif tipo == TipoSimbolo.naoTerminal:
+                                first_beta.update([x for x in first[nome] if x != '&'])
+                                if '&' not in first[nome]:
+                                    epsilon_em_tudo = False
+                                    break
+                            elif tipo == TipoSimbolo.epsilon:
+                                first_beta.add('&')
+                                break
+
+                        # Adiciona FIRST(β) \ {ε} em FOLLOW(B)
+                        antes = len(follow[B])
+                        follow[B].update(first_beta - {'&'})
+                        if len(follow[B]) > antes:
+                            mudou = True
+
+                        # Regra 3: se FIRST(β) contém ε, então FOLLOW(A) vai para FOLLOW(B)
+                        if epsilon_em_tudo:
+                            antes = len(follow[B])
+                            follow[B].update(follow[cabeca])
+                            if len(follow[B]) > antes:
+                                mudou = True
+
+                    else:
+                        # Regra 3: A ::= α B → FOLLOW(A) vai para FOLLOW(B)
+                        antes = len(follow[B])
+                        follow[B].update(follow[cabeca])
+                        if len(follow[B]) > antes:
+                            mudou = True
+
+        return follow
