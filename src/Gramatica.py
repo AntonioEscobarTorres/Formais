@@ -103,7 +103,7 @@ class Gramatica:
                     # Regra 2: A ::= α B β → tudo que está em FIRST(β) vai para FOLLOW(B)
                     if i + 1 < len(corpo):  # Existe β
                         beta = corpo[i+1:]  
-                        
+
                         # Calcula FIRST(β)
                         first_beta = set()
                         epsilon_em_tudo = True
@@ -147,3 +147,44 @@ class Gramatica:
                             mudou = True
 
         return follow
+
+    def obter_producoes(self):
+        return self.producoes
+    
+    def obter_nao_terminais(self):
+        return self.nao_terminais
+    
+    def obter_terminais(self):
+        return self.terminais
+    
+    def obter_inicial(self):
+        return self.inicial
+    
+    def __str__(self):
+        linhas = []
+        linhas.append(f"Símbolo inicial: {self.inicial}")
+        linhas.append(f"Não-terminais: {', '.join(sorted(self.nao_terminais))}")
+        linhas.append(f"Terminais: {', '.join(sorted(self.terminais))}")
+        linhas.append("Produções:")
+
+        # Agrupa produções por cabeça
+        producoes_por_cabeca = {}
+        for p in self.producoes:
+            cabeca = p.obter_cabeca()
+            corpo = p.obter_corpo()
+            corpo_str = ' '.join(s.obter_nome() for s in corpo)
+            if cabeca not in producoes_por_cabeca:
+                producoes_por_cabeca[cabeca] = []
+            producoes_por_cabeca[cabeca].append(corpo_str)
+
+        # Garante que o símbolo inicial venha primeiro
+        ordem_cabecas = [self.inicial] + sorted(nt for nt in producoes_por_cabeca if nt != self.inicial)
+
+        for cabeca in ordem_cabecas:
+            if cabeca in producoes_por_cabeca:
+                corpos = producoes_por_cabeca[cabeca]
+                linha = f"  {cabeca} ::= {' | '.join(corpos)}"
+                linhas.append(linha)
+
+        return '\n'.join(linhas)
+

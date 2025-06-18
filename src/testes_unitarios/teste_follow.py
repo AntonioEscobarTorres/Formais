@@ -26,6 +26,11 @@ def main():
 
     gramatica = Gramatica(S, nao_terminais, terminais, producoes)
 
+    print("Gramatica:")
+    print(gramatica)
+    print('---------------------')
+
+
     print("FIRST:")
     first = gramatica.calcular_first()
     for nt in first:
