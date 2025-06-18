@@ -1,6 +1,5 @@
 
 
-
 class Simbolo:
     
     def __init__(self, nome, tipo):

@@ -1,10 +1,10 @@
-from src.Simbolo import Simbolo
+from Simbolo import Simbolo
 
 class Producao:
     def __init__(self, cabeca, corpo : Simbolo):
         self.cabeca = cabeca
         self.corpo = corpo
-        pass
+        
 
     def obter_cabeca(self):
         return self.cabeca
