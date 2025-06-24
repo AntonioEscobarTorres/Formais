@@ -1,4 +1,5 @@
 from TipoSimbolo import TipoSimbolo
+from ItemLR0 import ItemLR0
 
 class Gramatica:
     def __init__(self, inicial, nao_terminais, terminais, producoes):
@@ -188,3 +189,39 @@ class Gramatica:
 
         return '\n'.join(linhas)
 
+
+    from ItemLR0 import ItemLR0
+
+    def criar_item_inicial(self):
+        simbolo_inicial = self.obter_inicial()
+        for producao in self.obter_producoes():
+            if producao.obter_cabeca() == simbolo_inicial:
+                return ItemLR0(producao, 0)
+        raise ValueError(f"Nenhuma produção encontrada com cabeça {simbolo_inicial}")
+
+
+    # Closure de um item LR(0)
+    def calcular_fecho(self, itens_I): 
+            fecho = set(itens_I)
+            adicionado = True
+            while adicionado:
+                adicionado = False
+                novos_itens = set()
+                for item in fecho:
+                    # Pega o símbolo B logo após o ponto na produção [A ::= α.Bβ]
+                    simbolo_B = item.obter_simbolo_apos_ponto()
+                    
+                    # Se B for um não-terminal...
+                    if simbolo_B and simbolo_B.obter_tipo() == TipoSimbolo.naoTerminal:
+                        nome_B = simbolo_B.obter_nome()
+                        # ...para cada produção B ::= γ...
+                        for prod in self.producoes:
+                            if prod.obter_cabeca() == nome_B:
+                                # ...adiciona o item [B ::= .γ] ao fecho.
+                                novo_item = ItemLR0(prod, 0)
+                                if novo_item not in fecho and novo_item not in novos_itens:
+                                    novos_itens.add(novo_item)
+                                    adicionado = True
+                fecho.update(novos_itens)
+                
+            return fecho
