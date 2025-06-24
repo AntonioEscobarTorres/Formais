@@ -225,3 +225,30 @@ class Gramatica:
                 fecho.update(novos_itens)
                 
             return fecho
+    
+    def calcular_colecao_canonica(self):
+        simbolos = list(self.nao_terminais | self.terminais)
+        item_inicial = self.criar_item_inicial()
+        I0 = frozenset(self.calcular_fecho({item_inicial}))
+        colecao = [I0]
+        nomes = {I0: 'I0'}
+        transicoes = {}
+        fila = [I0]
+        contador = 1
+        while fila:
+            estado = fila.pop(0)
+            for simbolo in simbolos:
+                itens_avancados = set()
+                for item in estado:
+                    prox = item.obter_simbolo_apos_ponto()
+                    if prox and prox.obter_nome() == simbolo:
+                        itens_avancados.add(item.avancar_ponto())
+                if itens_avancados:
+                    fecho = frozenset(self.calcular_fecho(itens_avancados))
+                    if fecho not in nomes:
+                        nomes[fecho] = f"I{contador}"
+                        colecao.append(fecho)
+                        fila.append(fecho)
+                        contador += 1
+                    transicoes[(nomes[estado], simbolo)] = nomes[fecho]
+        return [(nomes[conj], conj) for conj in colecao], transicoes

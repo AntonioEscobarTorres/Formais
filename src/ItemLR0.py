@@ -1,6 +1,6 @@
-# ItemLR0.py
 
-from TipoSimbolo import TipoSimbolo  # <-- ESTA É A LINHA QUE FALTAVA
+
+from TipoSimbolo import TipoSimbolo  
 
 class ItemLR0:
     def __init__(self, producao, posicao_ponto):
@@ -61,3 +61,5 @@ class ItemLR0:
         
         corpo_str.insert(self.posicao_ponto, '.')
         return f"{self.producao.obter_cabeca()} ::= {' '.join(corpo_str)}"
+
+   
