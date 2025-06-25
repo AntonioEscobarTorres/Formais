@@ -2,9 +2,6 @@ import sys
 import os
 from pprint import pprint
 
-# Adiciona o diretório pai ao path para permitir os imports
-# (Assumindo que a estrutura é src/Analisador_Sintatico/ e este script está em src/testes/)
-# Ajuste conforme a sua estrutura de execução.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from Analisador_Sintatico.Gramatica import Gramatica
@@ -45,12 +42,10 @@ class AnalisadorSintatico:
         self.parser_slr.imprimir_tabela()
 
     def analisar(self, lista_tokens: list[str]):
-
         print(f"\nAnalisando entrada: {lista_tokens}")
         if not self.parser_slr:
             print("❌ Erro: O parser SLR não foi inicializado.")
             return False
-            
         return self.parser_slr.parse(lista_tokens)
 
 

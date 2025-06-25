@@ -1,12 +1,24 @@
 from Analisador_Sintatico.TipoSimbolo import TipoSimbolo
+from Analisador_Sintatico.Simbolo import Simbolo
+from Analisador_Sintatico.Producao import Producao
 from Analisador_Sintatico.ItemLR0 import ItemLR0
 
 class Gramatica:
-    def __init__(self, inicial, nao_terminais, terminais, producoes):
+    def __init__(self, simbolo_inicial, nao_terminais, terminais, producoes):
+       
+        simbolo_inicial_aumentado = simbolo_inicial + "'"
+        
+        nao_terminais.add(simbolo_inicial_aumentado)
+        
+        simbolo_inicial_obj = Simbolo(simbolo_inicial, TipoSimbolo.naoTerminal)
+        producao_aumentada = Producao(simbolo_inicial_aumentado, [simbolo_inicial_obj])
+        
+        producoes.insert(0, producao_aumentada)
+
+        self.inicial = simbolo_inicial_aumentado
         self.nao_terminais = nao_terminais
         self.terminais = terminais
         self.producoes = producoes
-        self.inicial = inicial
         
     def calcular_first(self):
         # Inicializa o conjunto FIRST para cada não terminal
@@ -189,12 +201,10 @@ class Gramatica:
         return '\n'.join(linhas)
 
     def criar_item_inicial(self):
-        simbolo_inicial = self.obter_inicial()
-        for producao in self.obter_producoes():
-            if producao.obter_cabeca() == simbolo_inicial:
-                return ItemLR0(producao, 0)
-        raise ValueError(f"Nenhuma produção encontrada com cabeça {simbolo_inicial}")
-
+        producao_inicial_aumentada = self.obter_producoes()[0]
+        # Confirma se a produção é a correta
+        if producao_inicial_aumentada.obter_cabeca() == self.inicial:
+            return ItemLR0(producao_inicial_aumentada, 0)
 
     # Closure de um item LR(0)
     def calcular_fecho(self, itens_I): 

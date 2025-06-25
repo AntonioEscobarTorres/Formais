@@ -38,21 +38,31 @@ class ItemLR0:
             return ItemLR0(self.producao, self.posicao_ponto + 1)
         return self
 
-    # Define os métodos de comparação para garantir que dois itens sejam considerados iguais
-    # se tiverem a mesma produção e a mesma posição do ponto.
     def __eq__(self, other):
         if not isinstance(other, ItemLR0):
             return NotImplemented
-        return (self.producao.obter_cabeca() == other.producao.obter_cabeca() and
-                str(self.producao.obter_corpo()) == str(other.producao.obter_corpo()) and
-                self.posicao_ponto == other.posicao_ponto)
+        
+        # Compara a cabeça da produção.
+        if self.producao.obter_cabeca() != other.producao.obter_cabeca():
+            return False
+            
+        # Compara o corpo da produção, símbolo por símbolo.
+        meu_corpo = self.producao.obter_corpo()
+        outro_corpo = other.producao.obter_corpo()
+        if len(meu_corpo) != len(outro_corpo):
+            return False
+        for s1, s2 in zip(meu_corpo, outro_corpo):
+            if s1.obter_nome() != s2.obter_nome():
+                return False
+
+        # Compara a posição do ponto.
+        return self.posicao_ponto == other.posicao_ponto
 
     def __hash__(self):
-        # É importante garantir que os elementos do corpo sejam hasheáveis.
-        # Uma forma segura é converter a representação do corpo para string.
-        corpo_str = ' '.join(s.obter_nome() for s in self.producao.obter_corpo())
-        return hash((self.producao.obter_cabeca(), corpo_str, self.posicao_ponto))
 
+        # Cria uma tupla com os nomes dos símbolos do corpo para que seja hasheável.
+        corpo_nomes = tuple(s.obter_nome() for s in self.producao.obter_corpo())
+        return hash((self.producao.obter_cabeca(), corpo_nomes, self.posicao_ponto))
     def __str__(self):
         corpo_str = [s.obter_nome() for s in self.producao.obter_corpo()]
         
