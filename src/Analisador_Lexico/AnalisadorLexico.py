@@ -23,7 +23,7 @@ class AnalisadorLexico:
 
         # Associa cada palavra lida ao seu token correspondente
         self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
-        self.analisar_entrada(LeitorDeEr.ler_arquivo_entrada("./Testes/testes.txt"))
+        self.analisar_entrada(LeitorDeEr.ler_arquivo_entrada("./Testes/palavras_reservadas1.txt"))
     
     # Analisa uma lista de palavras e retorna uma lista com seus respectivos tokens reconhecidos
     def analisar_entrada(self, entrada: list[str]) -> list[tuple[str, str]]:
