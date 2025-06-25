@@ -2,11 +2,11 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from Gramatica import Gramatica
-from Simbolo import Simbolo
-from Producao import Producao
-from TipoSimbolo import TipoSimbolo
-from ItemLR0 import ItemLR0
+from Analisador_Sintatico.Gramatica import Gramatica
+from Analisador_Sintatico.Simbolo import Simbolo
+from Analisador_Sintatico.Producao import Producao
+from Analisador_Sintatico.TipoSimbolo import TipoSimbolo
+from Analisador_Sintatico.ItemLR0 import ItemLR0
 
 def main():
     # Definição dos símbolos
@@ -26,7 +26,6 @@ def main():
         Producao(F, [Simbolo(abre, TipoSimbolo.terminal), Simbolo(E, TipoSimbolo.naoTerminal), Simbolo(fecha, TipoSimbolo.terminal)]),
         Producao(F, [Simbolo(id_, TipoSimbolo.terminal)]),
     ]
-
     gramatica = Gramatica(E_linha, nao_terminais, terminais, producoes)
 
     print("Gramática:")

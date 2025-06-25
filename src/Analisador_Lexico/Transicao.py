@@ -1,4 +1,4 @@
-from src.Estado import Estado
+from Analisador_Lexico.Estado import Estado
 
     # Representa uma transição entre dois estados em um autômato,
     # Ativada por um símbolo específico.

@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from SLR import SLRParser
+from Analisador_Sintatico.SLR import SLRParser
 
 # Produções da gramática:
 producoes = [

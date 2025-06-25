@@ -1,6 +1,10 @@
-from src.Estado import Estado
-from src.Transicao import Transicao
-from src.Automato import Automato
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from Analisador_Lexico.Estado import Estado
+from Analisador_Lexico.Transicao import Transicao
+from Analisador_Lexico.Automato import Automato
 
 # Estados
 q0 = Estado("q0")

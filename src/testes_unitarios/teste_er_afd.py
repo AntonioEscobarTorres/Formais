@@ -1,4 +1,7 @@
-from ExpressaoRegular import ExpressaoRegular
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from Analisador_Lexico.ExpressaoRegular import ExpressaoRegular
 
 def exportar_afd(afd, arquivo=None):
     estados = list(afd.get_estados())

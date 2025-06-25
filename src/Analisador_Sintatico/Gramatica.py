@@ -1,5 +1,5 @@
-from TipoSimbolo import TipoSimbolo
-from ItemLR0 import ItemLR0
+from Analisador_Sintatico.TipoSimbolo import TipoSimbolo
+from Analisador_Sintatico.ItemLR0 import ItemLR0
 
 class Gramatica:
     def __init__(self, inicial, nao_terminais, terminais, producoes):
@@ -7,7 +7,6 @@ class Gramatica:
         self.terminais = terminais
         self.producoes = producoes
         self.inicial = inicial
-
         
     def calcular_first(self):
         # Inicializa o conjunto FIRST para cada não terminal
@@ -189,9 +188,6 @@ class Gramatica:
 
         return '\n'.join(linhas)
 
-
-    from ItemLR0 import ItemLR0
-
     def criar_item_inicial(self):
         simbolo_inicial = self.obter_inicial()
         for producao in self.obter_producoes():
@@ -251,4 +247,36 @@ class Gramatica:
                         fila.append(fecho)
                         contador += 1
                     transicoes[(nomes[estado], simbolo)] = nomes[fecho]
+            
         return [(nomes[conj], conj) for conj in colecao], transicoes
+
+    def obter_producoes_formato_parser(self):
+        producoes_final_parser = []
+        for prod_obj in self.producoes:
+            prod_dict = {
+                'cabeca': prod_obj.obter_cabeca(),
+                'corpo': [simbolo.obter_nome() for simbolo in prod_obj.obter_corpo()]
+            }
+            producoes_final_parser.append(prod_dict)
+        return producoes_final_parser
+
+    def obter_colecao_formato_parser(self):
+
+        colecao_com_nomes, _ = self.calcular_colecao_canonica()
+
+        colecao_ordenada = sorted(colecao_com_nomes, key=lambda tupla: int(tupla[0][1:]))
+        
+        colecao_final_parser = []
+        for nome_estado, conjunto_itens in colecao_ordenada:
+            estado_transformado = []
+            for item_obj in sorted(list(conjunto_itens), key=lambda x: str(x)):
+                item_dict = {
+                    'cabeca': item_obj.producao.obter_cabeca(),
+                    'corpo': [simbolo.obter_nome() for simbolo in item_obj.producao.obter_corpo()],
+                    'ponto': item_obj.posicao_ponto
+                }
+                estado_transformado.append(item_dict)
+            
+            colecao_final_parser.append(estado_transformado)
+            
+        return colecao_final_parser

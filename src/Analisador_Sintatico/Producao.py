@@ -1,10 +1,9 @@
-from Simbolo import Simbolo
+from Analisador_Sintatico.Simbolo import Simbolo
 
 class Producao:
     def __init__(self, cabeca, corpo : Simbolo):
         self.cabeca = cabeca
         self.corpo = corpo
-        
 
     def obter_cabeca(self):
         return self.cabeca

@@ -1,5 +1,5 @@
-from src.Estado import Estado
-from src.Transicao import Transicao
+from Analisador_Lexico.Estado import Estado
+from Analisador_Lexico.Transicao import Transicao
 from typing import Set
 from collections import deque
 

@@ -1,6 +1,6 @@
 
 
-from TipoSimbolo import TipoSimbolo  
+from Analisador_Sintatico.TipoSimbolo import TipoSimbolo  
 
 class ItemLR0:
     def __init__(self, producao, posicao_ponto):

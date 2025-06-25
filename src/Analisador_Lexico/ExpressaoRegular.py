@@ -1,7 +1,7 @@
 import re
-from src.Automato import Automato
-from src.Estado import Estado
-from src.Transicao import Transicao
+from Analisador_Lexico.Automato import Automato
+from Analisador_Lexico.Estado import Estado
+from Analisador_Lexico.Transicao import Transicao
 
 class NodoER:
     def __init__(self, valor, esquerda=None, direita=None):
