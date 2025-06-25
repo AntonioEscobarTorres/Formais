@@ -250,33 +250,28 @@ class Gramatica:
             
         return [(nomes[conj], conj) for conj in colecao], transicoes
 
-    def obter_producoes_formato_parser(self):
-        producoes_final_parser = []
-        for prod_obj in self.producoes:
-            prod_dict = {
-                'cabeca': prod_obj.obter_cabeca(),
-                'corpo': [simbolo.obter_nome() for simbolo in prod_obj.obter_corpo()]
-            }
-            producoes_final_parser.append(prod_dict)
-        return producoes_final_parser
+    def imprimir_itens_canonicos(self):
+        colecao, _ = self.calcular_colecao_canonica()
+        print("\nCOLEÇÃO CANÔNICA DE ITENS LR(0):\n")
+        for nome_estado, conjunto in colecao:
+            print(f"{nome_estado}:")
+            for item in sorted(conjunto, key=lambda x: str(x)):
+                print(f"  {item}")
+            print("-" * 40)
 
-    def obter_colecao_formato_parser(self):
 
-        colecao_com_nomes, _ = self.calcular_colecao_canonica()
+    def obter_colecao_canonica(self):
+        colecao, _ = self.calcular_colecao_canonica()
+        return colecao
 
-        colecao_ordenada = sorted(colecao_com_nomes, key=lambda tupla: int(tupla[0][1:]))
-        
-        colecao_final_parser = []
-        for nome_estado, conjunto_itens in colecao_ordenada:
-            estado_transformado = []
-            for item_obj in sorted(list(conjunto_itens), key=lambda x: str(x)):
-                item_dict = {
-                    'cabeca': item_obj.producao.obter_cabeca(),
-                    'corpo': [simbolo.obter_nome() for simbolo in item_obj.producao.obter_corpo()],
-                    'ponto': item_obj.posicao_ponto
-                }
-                estado_transformado.append(item_dict)
-            
-            colecao_final_parser.append(estado_transformado)
-            
-        return colecao_final_parser
+    def obter_inicial(self):
+        return self.inicial
+    
+    def obter_nao_terminais(self):
+        return self.nao_terminais
+    
+    def obter_terminais(self):
+        return self.terminais
+    
+    def obter_producoes(self):
+        return self.producoes

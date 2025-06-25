@@ -35,13 +35,14 @@ class AnalisadorSintatico:
         
         self.gramatica_obj = Gramatica(simbolo_inicial, nao_terminais, terminais, producoes)
         
-        producoes_para_parser = self.gramatica_obj.obter_producoes_formato_parser()
-        colecao_para_parser = self.gramatica_obj.obter_colecao_formato_parser()
+        colecao_canonica, _ = self.gramatica_obj.calcular_colecao_canonica()
+        colecao_para_parser = [conj for _, conj in colecao_canonica]
         follow_para_parser = self.gramatica_obj.calcular_follow()
 
-        gramatica_mock = type('G', (), {'producoes': producoes_para_parser})()
         
-        self.parser_slr = SLRParser(gramatica_mock, colecao_para_parser, follow_para_parser)
+        self.parser_slr = SLRParser(self.gramatica_obj, colecao_para_parser, follow_para_parser)
+        self.gramatica_obj.imprimir_itens_canonicos()
+        self.parser_slr.imprimir_tabela()
 
     def analisar(self, lista_tokens: list[str]):
 
@@ -50,11 +51,8 @@ class AnalisadorSintatico:
             print("❌ Erro: O parser SLR não foi inicializado.")
             return False
             
-        try:
-            return self.parser_slr.parse(lista_tokens)
-        except Exception as e:
-            print(f"❌ Erro durante a análise sintática: {e}")
-            return False
+        return self.parser_slr.parse(lista_tokens)
+
 
     def salvar_tabela_de_analise(self, nome_arquivo="tabela_slr.txt"):
         if not self.parser_slr or not hasattr(self.parser_slr, 'action'):

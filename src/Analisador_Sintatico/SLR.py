@@ -1,110 +1,149 @@
+from Analisador_Sintatico.TipoSimbolo import TipoSimbolo
+
 class SLRParser:
     def __init__(self, gramatica, colecao_canonica, follow):
         self.gramatica = gramatica
-        self.colecao_canonica = colecao_canonica  # Lista de conjuntos de itens LR(0)
-        self.follow = follow
+        self.colecao_canonica = colecao_canonica  # List[frozenset[ItemLR0]]
+        self.follow = follow                      # Dict[str, Set[str]]
         self.action = {}
         self.goto = {}
         self._construir_tabela_slr()
 
     def _construir_tabela_slr(self):
-        terminais = set()
-        nao_terminais = set()
-        for prod in self.gramatica.producoes:
-            terminais.update([x for x in prod['corpo'] if not x.isupper()])
-            nao_terminais.add(prod['cabeca'])
-        terminais.add('$')
+        terminais = self.gramatica.obter_terminais().union({'$'})
+        nao_terminais = self.gramatica.obter_nao_terminais()
 
-        # Mapeia produções para índices
-        prod_map = []
-        for idx, prod in enumerate(self.gramatica.producoes):
-            prod_map.append((prod['cabeca'], tuple(prod['corpo'])))
+        producoes = self.gramatica.obter_producoes()
 
         for i, I in enumerate(self.colecao_canonica):
-            # ACTION
+
             for item in I:
-                cabeca = item['cabeca']
-                corpo = item['corpo']
-                ponto = item['ponto']
-                # Caso 1: item é [A -> α . a β], a é terminal
-                if ponto < len(corpo):
-                    a = corpo[ponto]
-                    if a in terminais and a != '&':
-                        j = self._ir_para(i, a)
-                        if j is not None:
-                            self.action[(i, a)] = ('shift', j)
-                # Caso 2: item é [A -> α .], ponto no fim
-                else:
-                    if cabeca == self.gramatica.producoes[0]['cabeca']:
-                        # Produção inicial aumentada
+                prod = item.obter_producao()
+                cabeca = prod.obter_cabeca()
+                corpo = prod.obter_corpo()
+                ponto = item.obter_posicao_ponto()
+
+                simbolo_apos = item.obter_simbolo_apos_ponto()
+
+                # CASO SHIFT: [A → α . a β] e 'a' terminal
+                if simbolo_apos and simbolo_apos.obter_tipo() == TipoSimbolo.terminal:
+                    simbolo_nome = simbolo_apos.obter_nome()
+                    j = self._estado_destino(I, simbolo_nome)
+                    if j is not None:
+                        self.action[(i, simbolo_nome)] = ('shift', j)
+
+                # CASO REDUCE ou ACCEPT
+                elif item.esta_completo():
+                    # ACCEPT: produção inicial e símbolo de final
+                    if cabeca == self.gramatica.obter_inicial():
                         self.action[(i, '$')] = ('accept',)
                     else:
-                        # Reduce para cada símbolo em FOLLOW(A)
-                        prod_idx = self._indice_producao(cabeca, corpo)
-                        for a in self.follow[cabeca]:
-                            self.action[(i, a)] = ('reduce', prod_idx)
-            # GOTO
+                        # REDUCE para todos os símbolos em FOLLOW(cabeca)
+                        prod_idx = producoes.index(prod)
+                        for terminal in self.follow.get(cabeca, []):
+                            self.action[(i, terminal)] = ('reduce', prod_idx)
+
+            # GOTO: para cada não-terminal A
             for A in nao_terminais:
-                j = self._ir_para(i, A)
+                j = self._estado_destino(I, A)
                 if j is not None:
                     self.goto[(i, A)] = j
 
-    def _ir_para(self, i, X):
-        if not self.colecao_canonica or i >= len(self.colecao_canonica):
-            return None
-        I = self.colecao_canonica[i]
-        prox = []
+    def _estado_destino(self, I, simbolo_nome):
+        """
+        Determina o estado alcançado ao fazer transição com 'simbolo_nome' a partir de estado 'I'
+        """
+        itens_avancados = set()
         for item in I:
-            corpo = item['corpo']
-            ponto = item['ponto']
-            if ponto < len(corpo) and corpo[ponto] == X:
-                prox.append({'cabeca': item['cabeca'], 'corpo': corpo, 'ponto': ponto + 1})
-        if not prox:
+            simbolo_apos = item.obter_simbolo_apos_ponto()
+            if simbolo_apos and simbolo_apos.obter_nome() == simbolo_nome:
+                itens_avancados.add(item.avancar_ponto())
+        if not itens_avancados:
+
             return None
-        # Busca o conjunto igual na coleção canônica (agora aceita subconjunto)
-        for j, J in enumerate(self.colecao_canonica):
-            if set((item['cabeca'], tuple(item['corpo']), item['ponto']) for item in prox).issubset(
-                set((item['cabeca'], tuple(item['corpo']), item['ponto']) for item in J)
-            ):
+
+        fecho = frozenset(self.gramatica.calcular_fecho(itens_avancados))
+        for j, estado in enumerate(self.colecao_canonica):
+            if fecho == estado:
+
                 return j
         return None
 
-    def _mesmo_conjunto(self, I, J):
-        # Compara dois conjuntos de itens (listas de dicts)
-        return set((item['cabeca'], tuple(item['corpo']), item['ponto']) for item in I) == \
-               set((item['cabeca'], tuple(item['corpo']), item['ponto']) for item in J)
-
-    def _indice_producao(self, cabeca, corpo):
-        # Retorna o índice da produção (cabeca, corpo) na lista de produções
-        for idx, prod in enumerate(self.gramatica.producoes):
-            if prod['cabeca'] == cabeca and list(prod['corpo']) == list(corpo):
-                return idx
-        raise Exception(f"Produção não encontrada: {cabeca} -> {corpo}")
-
     def parse(self, tokens):
-        # Algoritmo 4.44: parsing LR
         pilha = [0]
         entrada = tokens + ['$']
-        a = entrada.pop(0)
+        ponteiro = 0 # Usando um ponteiro em vez de pop(0)
+
         while True:
+
             s = pilha[-1]
+            a = entrada[ponteiro]
+
             acao = self.action.get((s, a))
+
             if acao is None:
-                print(f"Erro de sintaxe: estado={s}, token={a}")
+                print(f"Erro de sintaxe: Nenhuma ação para estado={s}, token='{a}'")
                 return False
+
             if acao[0] == 'shift':
                 pilha.append(acao[1])
-                a = entrada.pop(0)
+                ponteiro += 1
+
             elif acao[0] == 'reduce':
-                prod = self.gramatica.producoes[acao[1]]
-                for _ in prod['corpo']:
-                    pilha.pop()
+                prod_idx = acao[1]
+                prod = self.gramatica.obter_producoes()[prod_idx]
+                
+                if prod.obter_corpo() and prod.obter_corpo()[0].obter_nome() != '&':
+                    for _ in prod.obter_corpo():
+                        if pilha:
+                            pilha.pop()
+                        else:
+                            print("!!! ERRO: Tentativa de pop em pilha vazia durante reduce!")
+                            return False
+
+                if not pilha:
+                    print("!!! ERRO: Pilha ficou vazia após o reduce!")
+                    return False
+
                 t = pilha[-1]
-                pilha.append(self.goto[(t, prod['cabeca'])])
-                print(f"Reduce: {prod['cabeca']} -> {' '.join(prod['corpo'])}")
+                pilha.append(self.goto[(t, prod.obter_cabeca())])
+
             elif acao[0] == 'accept':
                 print("Sentença aceita!")
                 return True
-            else:
-                print("Erro de sintaxe")
-                return False
+
+
+    def imprimir_tabela(self):
+        estados = sorted(set(i for (i, _) in self.action.keys()) | set(i for (i, _) in self.goto.keys()))
+        terminais = sorted(set(s for (_, s) in self.action.keys()))
+        nao_terminais = sorted(set(s for (_, s) in self.goto.keys()))
+
+        print("\nTABELA DE ANÁLISE SLR(1)\n")
+
+        # Cabeçalho
+        cabecalho = ['Estado'] + terminais + nao_terminais
+        col_width = max(len(str(c)) for c in cabecalho) + 2
+        linha_formatada = ''.join(c.ljust(col_width) for c in cabecalho)
+        print(linha_formatada)
+        print('-' * len(linha_formatada))
+
+        for estado in estados:
+            linha = [str(estado)]
+            # ACTION
+            for t in terminais:
+                acao = self.action.get((estado, t))
+                if acao is None:
+                    linha.append('')
+                elif acao[0] == 'shift':
+                    linha.append(f's{acao[1]}')
+                elif acao[0] == 'reduce':
+                    linha.append(f'r{acao[1]}')
+                elif acao[0] == 'accept':
+                    linha.append('acc')
+                else:
+                    linha.append('?')
+            # GOTO
+            for nt in nao_terminais:
+                destino = self.goto.get((estado, nt), '')
+                linha.append(str(destino) if destino != '' else '')
+            print(''.join(c.ljust(col_width) for c in linha))

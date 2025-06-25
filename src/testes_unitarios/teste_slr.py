@@ -3,74 +3,87 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Analisador_Sintatico.SLR import SLRParser
+from Analisador_Sintatico.Gramatica import Gramatica
+from Analisador_Sintatico.Simbolo import Simbolo
+from Analisador_Sintatico.Producao import Producao
+from Analisador_Sintatico.TipoSimbolo import TipoSimbolo
+from Analisador_Sintatico.ItemLR0 import ItemLR0
+from Analisador_Sintatico.SLR import SLRParser 
 
-# Produções da gramática:
-producoes = [
-    {'cabeca': "S'", 'corpo': ['E']},      # Produção 0
-    {'cabeca': 'E', 'corpo': ['E', '*', 'n']},  # Produção 1
-    {'cabeca': 'E', 'corpo': ['n']}        # Produção 2
-]
+def main():
+    # Definição dos símbolos
+    E_, E, T, F = "E'", 'E', 'T', 'F'
+    mais, vezes, abre, fecha, id_ = '+', '*', '(', ')', 'id'
 
-# Coleção canônica de itens LR(0):
-colecao_canonica = [
-    # I0
-    [
-        {'cabeca': "S'", 'corpo': ['E'], 'ponto': 0},
-        {'cabeca': 'E', 'corpo': ['E', '*', 'n'], 'ponto': 0},
-        {'cabeca': 'E', 'corpo': ['n'], 'ponto': 0}
-    ],
-    # I1 (GOTO(0, E))
-    [
-        {'cabeca': "S'", 'corpo': ['E'], 'ponto': 1},
-        {'cabeca': 'E', 'corpo': ['E', '*', 'n'], 'ponto': 1}
-    ],
-    # I2 (SHIFT em 'n' a partir de I0)
-    [
-        {'cabeca': 'E', 'corpo': ['n'], 'ponto': 1}
-    ],
-    # I3 (SHIFT em '*' a partir de I1)
-    [
-        {'cabeca': 'E', 'corpo': ['E', '*', 'n'], 'ponto': 2}
-    ],
-    # I4 (SHIFT em 'n' a partir de I3)
-    [
-        {'cabeca': 'E', 'corpo': ['E', '*', 'n'], 'ponto': 3}
-    ],
-    # I5 (Estado final, após GOTO(1, E) ou GOTO(3, E) se expandisse mais)
-    [
-        # Nenhum item válido com ponto à esquerda — estado de erro
-    ]
-]
+    nao_terminais = {E_, E, T, F}
+    terminais = {mais, vezes, abre, fecha, id_}
+
+    # Produções
+    producoes = [
+        Producao(E_, [Simbolo(E, TipoSimbolo.naoTerminal)]),
+        Producao(E, [Simbolo(E, TipoSimbolo.naoTerminal), Simbolo(mais, TipoSimbolo.terminal), Simbolo(T, TipoSimbolo.naoTerminal)]),
+        Producao(E, [Simbolo(T, TipoSimbolo.naoTerminal)]),
+        Producao(T, [Simbolo(T, TipoSimbolo.naoTerminal), Simbolo(vezes, TipoSimbolo.terminal), Simbolo(F, TipoSimbolo.naoTerminal)]),
+        Producao(T, [Simbolo(F, TipoSimbolo.naoTerminal)]),
+        Producao(F, [Simbolo(abre, TipoSimbolo.terminal), Simbolo(E, TipoSimbolo.naoTerminal), Simbolo(fecha, TipoSimbolo.terminal)]),
+        Producao(F, [Simbolo(id_, TipoSimbolo.terminal)]),
+        ]
+
+    # Instancia a gramática
+    gramatica = Gramatica(E_, nao_terminais, terminais, producoes)
+
+    # Coleção canônica e follow
+    colecao_canonica, _ = gramatica.calcular_colecao_canonica()
+    follow = gramatica.calcular_follow()
+
+    # Criação do parser
+    parser = SLRParser(gramatica, [conj for _, conj in colecao_canonica], follow)
+
+    def imprimir_tabela_slr(parser):
+        estados = sorted(set(i for (i, _) in parser.action.keys()) | set(i for (i, _) in parser.goto.keys()))
+        terminais = sorted(set(s for (_, s) in parser.action.keys()))
+        nao_terminais = sorted(set(s for (_, s) in parser.goto.keys()))
+
+        print("\nTABELA DE ANÁLISE SLR(1)\n")
+
+        # Cabeçalho
+        cabecalho = ['Estado'] + terminais + nao_terminais
+        col_width = max(len(str(c)) for c in cabecalho) + 2
+        linha_formatada = ''.join(c.ljust(col_width) for c in cabecalho)
+        print(linha_formatada)
+        print('-' * len(linha_formatada))
+
+        for estado in estados:
+            linha = [str(estado)]
+            # ACTION
+            for t in terminais:
+                acao = parser.action.get((estado, t))
+                if acao is None:
+                    linha.append('')
+                elif acao[0] == 'shift':
+                    linha.append(f's{acao[1]}')
+                elif acao[0] == 'reduce':
+                    linha.append(f'r{acao[1]}')
+                elif acao[0] == 'accept':
+                    linha.append('acc')
+                else:
+                    linha.append('?')
+            # GOTO
+            for nt in nao_terminais:
+                destino = parser.goto.get((estado, nt), '')
+                linha.append(str(destino) if destino != '' else '')
+            print(''.join(c.ljust(col_width) for c in linha))
+
+    # Imprime a tabela SLR
+    parser.imprimir_tabela()
+    gramatica.imprimir_itens_canonicos()
+    # Sentença de teste: id + id * id
+    tokens = ['id', '+', 'id', '*', 'id']
+    print(f"\nAnalisando: {' '.join(tokens)}")
+    resultado = parser.parse(tokens)
+    print("Resultado:", "Aceita" if resultado else "Rejeitada")
 
 
-# Conjunto FOLLOW:
-follow = {
-    "S'": {'$'},
-    'E': {'$', '*'}
-}
 
-# Mock da gramática:
-gramatica = type('G', (), {'producoes': producoes})()
-
-# Instanciando o parser:
-parser = SLRParser(gramatica, colecao_canonica, follow)
-
-testes = [
-    (['b', 'a'], "Válido: b a"),
-    (['b'], "Inválido: falta o a"),
-    (['a', 'b'], "Inválido: ordem invertida"),
-    (['b', 'b', 'a'], "Inválido: b b a"),
-    (['b', 'a', 'a'], "Inválido: b a a"),
-    ([], "Inválido: vazio"),
-    (['c', 'a'], "Inválido: símbolo desconhecido"),
-    (['b', 'a', 'b', 'a'], "Inválido: duas sentenças coladas"),
-]
-
-# Rodando os testes:
-for tokens, descricao in testes:
-    print(f"\nTeste - {descricao}: Entrada: {tokens}")
-    try:
-        parser.parse(tokens)
-        print("✔️ Sentença aceita!")
-    except Exception as e:
-        print(f"❌ Erro detectado: {e}")
+if __name__ == "__main__":
+    main()
