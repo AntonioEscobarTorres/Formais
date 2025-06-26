@@ -7,3 +7,13 @@
 <se,palavras_reservadas>
 <entao,id>
 <fim,id>
+<checkout,id>
+<:,id>
+<;,id>
+<:=,id>
+<10,id>
+<>,id>
+<0,id>
+<*,id>
+<2.5,id>
+<.,id>

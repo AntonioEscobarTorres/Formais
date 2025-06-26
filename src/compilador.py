@@ -16,6 +16,11 @@ class Compilador:
 
         self.tokens = []
 
+    def carregar_palavras_reservadas(self):
+        with open(self.palavras_reservadas_path, "r", encoding="utf-8") as f:
+            self.palavras_reservadas = set(linha.strip() for linha in f if linha.strip())
+
+
     def salvar_tabela_simbolos(self):
         with open(self.tabela_simbolos_path, "w", encoding="utf-8") as f:
             for lexema, categoria in self.tabela_simbolos:
@@ -57,11 +62,13 @@ class Compilador:
 
         self.analisar_lexico(codigo)
 
+        self.carregar_palavras_reservadas()
+
         # Chama o analisador sintático
         analisador = AnalisadorSintatico("./Testes/gramatica_completa.txt")
         analisador.salvar_tabela_de_analise()
-        for tokens in self.tokens:
-            analisador.analisar(tuple(self.tokens))
+        analisador.analisar(self.tokens)
+
 
         # Salva possíveis novos identificadores na tabela
         self.salvar_tabela_simbolos()
