@@ -109,6 +109,7 @@ class SLRParser:
                 pilha.append(self.goto[(t, prod.obter_cabeca())])
 
             elif acao[0] == 'accept':
+                print("Oii")
                 print("Sentença aceita!")
                 return True
 

@@ -1,0 +1,9 @@
+<var,palavras_reservadas>
+<contador,id>
+<inteiro,tipos>
+<resultado,id>
+<real,tipos>
+<inicio,palavras_reservadas>
+<se,palavras_reservadas>
+<entao,id>
+<fim,id>

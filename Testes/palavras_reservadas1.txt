@@ -1,44 +1,8 @@
-if
-else
-while
-for
-function
-return
-class
-let
-const
-var
-true
-false
-null
-String
-Int
-Float
-List
-Var
-MinhaClasse
-_OutraClasseLegal
-ClasseDeExemplo123
-C
-_Helper
-InterfacePrincipal
-variavel
-_minhaVariavel
-nomeDoUsuario
-contador1
-i
-_temp
-exemploID
-0
-1
-123
-987654321
-7
-10
-500
-0,0
-1,5
-123,456
-999,0
-0,12345
-7,89
+var contador : inteiro ;
+var resultado : real ;
+
+inicio
+    contador := 10 ;
+    se contador > 0 entao
+        resultado := contador * 2.5
+    fim .

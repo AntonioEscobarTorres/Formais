@@ -38,14 +38,15 @@ class AnalisadorSintatico:
 
         
         self.parser_slr = SLRParser(self.gramatica_obj, colecao_para_parser, follow_para_parser)
-        self.gramatica_obj.imprimir_itens_canonicos()
-        self.parser_slr.imprimir_tabela()
+        #self.gramatica_obj.imprimir_itens_canonicos()
+        #self.parser_slr.imprimir_tabela()
 
     def analisar(self, lista_tokens: list[str]):
         print(f"\nAnalisando entrada: {lista_tokens}")
         if not self.parser_slr:
             print("❌ Erro: O parser SLR não foi inicializado.")
             return False
+        print(self.parser_slr.parse(lista_tokens))
         return self.parser_slr.parse(lista_tokens)
 
 
