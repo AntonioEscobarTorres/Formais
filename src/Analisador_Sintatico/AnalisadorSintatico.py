@@ -46,7 +46,6 @@ class AnalisadorSintatico:
         if not self.parser_slr:
             print("❌ Erro: O parser SLR não foi inicializado.")
             return False
-        print(self.parser_slr.parse(lista_tokens))
         return self.parser_slr.parse(lista_tokens)
 
 

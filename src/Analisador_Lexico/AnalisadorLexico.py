@@ -10,10 +10,10 @@ from Analisador_Lexico.LeitorDeEr import LeitorDeEr
 
 class AnalisadorLexico:
   
-    def __init__(self):
+    def __init__(self, caminho_expressoes="./Testes/expressoes1.txt", caminho_entrada="./Testes/palavras_reservadas.txt"):
         
         # Lê expressões regulares com seus respectivos tokens e prioridades a partir de um arquivo
-        self.expressoes = LeitorDeEr.ler_arquivo_er("./Testes/expressoes.txt")
+        self.expressoes = LeitorDeEr.ler_arquivo_er(caminho_expressoes)
         self.token_map = {}  # estado final → token
         self.afn_unificado = None
         self.afd = None
@@ -23,7 +23,7 @@ class AnalisadorLexico:
 
         # Associa cada palavra lida ao seu token correspondente
         self.tabela_de_simbolos = {} # Palavra lida -> Padrão 
-        self.analisar_entrada(LeitorDeEr.ler_arquivo_entrada("./Testes/palavras_reservadas1.txt"))
+        self.analisar_entrada(LeitorDeEr.ler_arquivo_entrada(caminho_entrada))
     
     # Analisa uma lista de palavras e retorna uma lista com seus respectivos tokens reconhecidos
     def analisar_entrada(self, entrada: list[str]) -> list[tuple[str, str]]:
@@ -93,13 +93,12 @@ class AnalisadorLexico:
             transicoes = [t for t in self.afd.get_transicoes()
                         if t.get_origem() == estado_atual and t.get_simbolo() == simbolo]
             if not transicoes:
-                print("[DEBUG] Nenhuma transição encontrada")
+                #print("[DEBUG] Nenhuma transição encontrada")
                 return "Token não reconhecido"
             estado_atual = transicoes[0].get_destino()
             #print(f"[DEBUG] Novo estado: {estado_atual.estado}")
 
         if estado_atual in self.afd.get_finais():
-
 
             self.tabela_de_simbolos[palavra] = self.token_map.get(estado_atual.estado, "Token desconhecido")
 
@@ -172,7 +171,7 @@ class AnalisadorLexico:
         except Exception as e:
             print(f"Ocorreu um erro ao tentar salvar o AFD no arquivo: {e}")
 
-    def salvar_tabela_de_simbolos(self, nome_arquivo="tabela_de_simbolos_salvo.txt"):
+    def salvar_tabela_de_simbolos(self, nome_arquivo="./Testes/tabela_de_simbolos_salvo.txt"):
         if not self.tabela_de_simbolos.items:
             print(f"Aviso: Tabela de símbolos está vazia. O arquivo '{nome_arquivo}' será criado vazio ou não será modificado se já existir vazio.")
             try:

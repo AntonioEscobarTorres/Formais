@@ -8,6 +8,3 @@ analisador = AnalisadorLexico()
 print(30*"-")
 
 analisador.print_tabela_de_simbolos()
-
-
-#python -m src.testes_unitarios.teste_analisador

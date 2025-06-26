@@ -4,5 +4,5 @@ var resultado : real ;
 inicio
     contador := 10 ;
     se contador > 0 entao
-        resultado := contador * 2.5
-    fim .
+        resultado := contador * 2
+fim .

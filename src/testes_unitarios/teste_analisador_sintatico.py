@@ -7,7 +7,7 @@ from Analisador_Sintatico.AnalisadorSintatico import AnalisadorSintatico
 
 def main():
 
-    analisador = AnalisadorSintatico("./Testes/gramatica.txt")
+    analisador = AnalisadorSintatico("./Testes/gramatica_completa.txt")
 
     print(f"Palavras reservadas encontradas: {analisador.get_palavras_reservadas()}")
 

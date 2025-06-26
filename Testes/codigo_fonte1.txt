@@ -1,0 +1,33 @@
+const inteiro Limite = 100 ; 
+var contador , resultado : inteiro ; 
+var nome : cadeia [ 20 ] ; 
+var intervaloIdade : intervalo 0 .. 120 ; 
+var notas : vetor [ 10 ] de real ; 
+
+funcao calculaDobro ( val x : inteiro ) : inteiro ; 
+var dobro : inteiro ; 
+proc imprimir ( val valor : inteiro ) ; 
+inicio 
+    inicio 
+        dobro := x * 2 ; 
+        leia ( dobro ) 
+    fim ; 
+    
+    inicio 
+        escreva ( valor ) 
+    fim ; 
+    inicio 
+        contador := 0 ; 
+        enquanto contador < inteiroLimite faca 
+            inicio resultado := calculaDobro ( contador ) ; 
+            se resultado > 50 entao 
+                leia ( dobro )
+            fim ;
+            inicio 
+                contador := contador + 1 ; 
+            fim ;
+    fim ;
+    inicio 
+        repita leia ( nome ) ate 50
+    fim ;
+fim .

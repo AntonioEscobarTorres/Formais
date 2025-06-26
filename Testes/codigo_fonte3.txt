@@ -1,0 +1,10 @@
+const inteiro Limite = 100 ;
+const inteiro Baixo = 0 ;
+var nota : inteiro ;
+
+inicio
+    se nota >= 60 entao
+        escreva ( Limite )
+    senao
+        escreva ( Limite )
+fim .

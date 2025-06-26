@@ -1,0 +1,4 @@
+var a , b : inteiro ;
+var nome : cadeia [ 50 ] ;
+inicio
+fim .
