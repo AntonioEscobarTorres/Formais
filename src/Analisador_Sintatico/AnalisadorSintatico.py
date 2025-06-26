@@ -45,7 +45,6 @@ class AnalisadorSintatico:
         print("")
         return self.parser_slr.parse(lista_tokens)
 
-
     def salvar_tabela_de_analise(self, nome_arquivo="./arquivos_gerados/tabela_slr.txt"):
         if not self.parser_slr or not hasattr(self.parser_slr, 'action'):
             print("Erro: Tabela de análise não foi gerada ou é inacessível.")
