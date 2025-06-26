@@ -1,5 +1,3 @@
-
-
 from Analisador_Sintatico.TipoSimbolo import TipoSimbolo  
 
 class ItemLR0:
@@ -59,16 +57,15 @@ class ItemLR0:
         return self.posicao_ponto == other.posicao_ponto
 
     def __hash__(self):
-
         # Cria uma tupla com os nomes dos símbolos do corpo para que seja hasheável.
         corpo_nomes = tuple(s.obter_nome() for s in self.producao.obter_corpo())
         return hash((self.producao.obter_cabeca(), corpo_nomes, self.posicao_ponto))
+
     def __str__(self):
         corpo_str = [s.obter_nome() for s in self.producao.obter_corpo()]
         
         if not corpo_str or corpo_str == ['&']:
             return f"{self.producao.obter_cabeca()} ::= ."
-        
         corpo_str.insert(self.posicao_ponto, '.')
         return f"{self.producao.obter_cabeca()} ::= {' '.join(corpo_str)}"
 

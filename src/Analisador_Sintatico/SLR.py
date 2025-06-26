@@ -3,8 +3,8 @@ from Analisador_Sintatico.TipoSimbolo import TipoSimbolo
 class SLRParser:
     def __init__(self, gramatica, colecao_canonica, follow):
         self.gramatica = gramatica
-        self.colecao_canonica = colecao_canonica  # List[frozenset[ItemLR0]]
-        self.follow = follow                      # Dict[str, Set[str]]
+        self.colecao_canonica = colecao_canonica
+        self.follow = follow                      
         self.action = {}
         self.goto = {}
         self._construir_tabela_slr()
@@ -50,9 +50,6 @@ class SLRParser:
                     self.goto[(i, A)] = j
 
     def _estado_destino(self, I, simbolo_nome):
-        """
-        Determina o estado alcançado ao fazer transição com 'simbolo_nome' a partir de estado 'I'
-        """
         itens_avancados = set()
         for item in I:
             simbolo_apos = item.obter_simbolo_apos_ponto()
@@ -72,7 +69,7 @@ class SLRParser:
     def parse(self, tokens):
         pilha = [0]
         entrada = tokens + ['$']
-        ponteiro = 0 # Usando um ponteiro em vez de pop(0)
+        ponteiro = 0
 
         while True:
 

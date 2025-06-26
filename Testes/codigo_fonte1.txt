@@ -5,17 +5,17 @@ var intervaloIdade : intervalo 0 .. 120 ;
 var notas : vetor [ 10 ] de real ; 
 
 funcao calculaDobro ( val x : inteiro ) : inteiro ; 
-var dobro : inteiro ; 
-proc imprimir ( val valor : inteiro ) ; 
-inicio 
+    var dobro : inteiro ; 
     inicio 
         dobro := x * 2 ; 
         leia ( dobro ) 
     fim ; 
-    
+proc imprimir ( val valor : inteiro ) ; 
     inicio 
         escreva ( valor ) 
     fim ; 
+
+inicio 
     inicio 
         contador := 0 ; 
         enquanto contador < inteiroLimite faca 
@@ -28,6 +28,6 @@ inicio
             fim ;
     fim ;
     inicio 
-        repita leia ( nome ) ate 50
-    fim ;
+        repita leia ( nome ) ate 50 
+    fim
 fim .

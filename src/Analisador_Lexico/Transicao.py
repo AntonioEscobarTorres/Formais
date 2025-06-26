@@ -22,7 +22,6 @@ class Transicao:
         return self.destino
 
     # Retorna uma representação legível da transição, com o símbolo em amarelo.
-    # Útil para impressão no terminal.
     def __str__(self):
         return f"{self.origem.get_estado()},{self.simbolo},{self.destino.get_estado()}"
 

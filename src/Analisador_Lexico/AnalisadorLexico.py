@@ -147,7 +147,6 @@ class AnalisadorLexico:
             alfabeto_total
         )
 
-
     def print_tabela_de_simbolos(self):
         # Imprime a tabela de símbolos gerada após a análise léxica
         for lexema, token in self.tabela_de_simbolos.items():
@@ -159,7 +158,7 @@ class AnalisadorLexico:
     def get_automato_afd(self) -> Automato:
         return self.afd
 
-    def salvar_AFD(self, nome_arquivo="afd_salvo.txt"):
+    def salvar_AFD(self, nome_arquivo="./arquivos_gerados/afd_salvo.txt"):
         if self.afd is None:
             print("Erro: O AFD não foi gerado ou é None. Nada para salvar.")
             return
@@ -171,7 +170,7 @@ class AnalisadorLexico:
         except Exception as e:
             print(f"Ocorreu um erro ao tentar salvar o AFD no arquivo: {e}")
 
-    def salvar_tabela_de_simbolos(self, nome_arquivo="./Testes/tabela_de_simbolos_salvo.txt"):
+    def salvar_tabela_de_simbolos(self, nome_arquivo="./arquivos_gerados/tabela_de_simbolos.txt"):
         if not self.tabela_de_simbolos.items:
             print(f"Aviso: Tabela de símbolos está vazia. O arquivo '{nome_arquivo}' será criado vazio ou não será modificado se já existir vazio.")
             try:

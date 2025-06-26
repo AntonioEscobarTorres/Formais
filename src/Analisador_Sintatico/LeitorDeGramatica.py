@@ -24,7 +24,7 @@ class LeitorDeGramatica:
                 if cabeca_bruta.startswith('<') and cabeca_bruta.endswith('>'):
                     cabeca = cabeca_bruta[1:-1].upper().replace('-', '_')
                 else:
-                    cabeca = cabeca_bruta # Mantém compatibilidade com o formato antigo
+                    cabeca = cabeca_bruta
 
                 todos_nao_terminais.add(cabeca)
                 if simbolo_inicial is None:

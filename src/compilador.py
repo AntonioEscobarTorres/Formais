@@ -5,19 +5,10 @@ from Analisador_Sintatico.AnalisadorSintatico import AnalisadorSintatico
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class Compilador:
-    """
-    Classe principal que orquestra as etapas de compilação:
-    1. Carrega uma tabela de símbolos pré-definida de um arquivo.
-    2. Processa o código-fonte linha por linha.
-    3. Para cada linha, converte os lexemas em tipos de token baseados na tabela.
-    4. Envia a lista de tipos de token de cada linha para o Analisador Sintático.
-    """
+
     def __init__(self, codigo_path, tabela_simbolos_path):
         self.codigo_path = codigo_path
         self.tabela_simbolos_path = tabela_simbolos_path
-        
-        # O dicionário que armazenará a tabela de símbolos pré-definida.
-        # Mapeia um lexema (palavra) para seu tipo de token (ex: 'var' -> 'var', 'contador' -> 'id')
         self.tabela_de_simbolos = {}
 
     def carregar_tabela_de_simbolos(self):
@@ -34,11 +25,20 @@ class Compilador:
             print(f"Erro: Arquivo da tabela de símbolos não encontrado em '{self.tabela_simbolos_path}'")
             sys.exit(1)
 
-    def compilar(self):
+    def salvar_tabela_de_simbolos(self):
+        try:
+            with open('./arquivos_gerados/tabela_de_simbolos_atualizada.txt', "w", encoding="utf-8") as f:
+                for lexema, tipo in self.tabela_de_simbolos.items():
+                    f.write(f"<{lexema},{tipo}>\n")
+            print(f"Tabela de símbolos atualizada foi salva em './arquivos_gerados/tabela_de_simbolos_atualizada.txt'.")
+        except Exception as e:
+            print(f"Erro ao salvar a tabela de símbolos: {e}")
+
+    def compilar(self, path_gramatica="./Testes/gramatica_completa.txt"):
 
         self.carregar_tabela_de_simbolos()
 
-        analisador = AnalisadorSintatico("./Testes/gramatica_completa.txt")
+        analisador = AnalisadorSintatico(path_gramatica)
         analisador.salvar_tabela_de_analise()
 
         try:
@@ -51,23 +51,28 @@ class Compilador:
     
         tokens_para_parser = []
         for num_linha, linha in enumerate(codigo_linhas, 1):
+
             linha_strip = linha.strip()
-            if not linha_strip:
-                continue
-            
             lexemas_da_linha = linha_strip.split()
             
             for lexema in lexemas_da_linha:
-                print(lexema)
+
                 tipo_token = self.tabela_de_simbolos.get(lexema)
-                print(tipo_token)
+
                 if tipo_token:
                     tokens_para_parser.append(tipo_token)
+
+                elif lexema.isalpha():
+                    print(f"  Novo identificador '{lexema}' detectado. Adicionando à tabela como <id,{len(self.tabela_de_simbolos)+1}>.")
+                    self.tabela_de_simbolos[lexema] = 'id'
+                    tokens_para_parser.append('id')
                 else:
                     tokens_para_parser.append(lexema)
 
-        print(f"  Tokens da linha convertidos para: {tokens_para_parser}")
+        #print(f"  Tokens da linha convertidos para: {tokens_para_parser}")
         analisador.analisar(tokens_para_parser)
         
         print("-" * 50)
         print("\nCompilação finalizada.")
+        print("")
+        self.salvar_tabela_de_simbolos()

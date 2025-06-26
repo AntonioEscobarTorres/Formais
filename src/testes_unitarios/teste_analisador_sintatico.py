@@ -38,12 +38,10 @@ def main():
     ]
     
     print("\n--- Iniciando Bateria de Testes Sintáticos ---")
-    # 3. Itera sobre os casos de teste e executa a análise.
     for tokens, descricao in casos_de_teste:
         print("-" * 50)
         print(f"Caso de Teste: {descricao}")
         
-        # O método analisar já imprime o resultado (aceito ou erro).
         analisador.analisar(tokens)
 
 if __name__ == "__main__":

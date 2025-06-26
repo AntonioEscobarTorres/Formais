@@ -39,41 +39,6 @@ def main():
     # Criação do parser
     parser = SLRParser(gramatica, [conj for _, conj in colecao_canonica], follow)
 
-    def imprimir_tabela_slr(parser):
-        estados = sorted(set(i for (i, _) in parser.action.keys()) | set(i for (i, _) in parser.goto.keys()))
-        terminais = sorted(set(s for (_, s) in parser.action.keys()))
-        nao_terminais = sorted(set(s for (_, s) in parser.goto.keys()))
-
-        print("\nTABELA DE ANÁLISE SLR(1)\n")
-
-        # Cabeçalho
-        cabecalho = ['Estado'] + terminais + nao_terminais
-        col_width = max(len(str(c)) for c in cabecalho) + 2
-        linha_formatada = ''.join(c.ljust(col_width) for c in cabecalho)
-        print(linha_formatada)
-        print('-' * len(linha_formatada))
-
-        for estado in estados:
-            linha = [str(estado)]
-            # ACTION
-            for t in terminais:
-                acao = parser.action.get((estado, t))
-                if acao is None:
-                    linha.append('')
-                elif acao[0] == 'shift':
-                    linha.append(f's{acao[1]}')
-                elif acao[0] == 'reduce':
-                    linha.append(f'r{acao[1]}')
-                elif acao[0] == 'accept':
-                    linha.append('acc')
-                else:
-                    linha.append('?')
-            # GOTO
-            for nt in nao_terminais:
-                destino = parser.goto.get((estado, nt), '')
-                linha.append(str(destino) if destino != '' else '')
-            print(''.join(c.ljust(col_width) for c in linha))
-
     # Imprime a tabela SLR
     parser.imprimir_tabela()
     gramatica.imprimir_itens_canonicos()

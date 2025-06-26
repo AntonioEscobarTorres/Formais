@@ -11,9 +11,6 @@ from Analisador_Sintatico.SLR import SLRParser
 class AnalisadorSintatico:
 
     def __init__(self, caminho_gramatica: str):
-        """
-        Inicializa o analisador sintático a partir de um ficheiro de gramática.
-        """
         self.caminho_gramatica = caminho_gramatica
         self.gramatica_obj = None
         self.palavras_reservadas = set()
@@ -42,14 +39,14 @@ class AnalisadorSintatico:
         #self.parser_slr.imprimir_tabela()
 
     def analisar(self, lista_tokens: list[str]):
-        print(f"\nAnalisando entrada: {lista_tokens}")
         if not self.parser_slr:
             print("❌ Erro: O parser SLR não foi inicializado.")
             return False
+        print("")
         return self.parser_slr.parse(lista_tokens)
 
 
-    def salvar_tabela_de_analise(self, nome_arquivo="tabela_slr.txt"):
+    def salvar_tabela_de_analise(self, nome_arquivo="./arquivos_gerados/tabela_slr.txt"):
         if not self.parser_slr or not hasattr(self.parser_slr, 'action'):
             print("Erro: Tabela de análise não foi gerada ou é inacessível.")
             return
@@ -67,5 +64,4 @@ class AnalisadorSintatico:
             print(f"Erro ao salvar a tabela de análise: {e}")
 
     def get_palavras_reservadas(self) -> set:
-        """Retorna o conjunto de palavras reservadas identificadas na gramática."""
         return self.palavras_reservadas

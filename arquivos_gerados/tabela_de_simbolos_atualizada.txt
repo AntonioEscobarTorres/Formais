@@ -1,0 +1,12 @@
+<var,var>
+<inteiro,inteiro>
+<real,real>
+<inicio,inicio>
+<10,num_int>
+<se,se>
+<0,num_int>
+<entao,entao>
+<2,num_int>
+<fim,fim>
+<contador,id>
+<resultado,id>

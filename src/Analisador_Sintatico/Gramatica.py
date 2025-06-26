@@ -21,17 +21,16 @@ class Gramatica:
         self.producoes = producoes
         
     def calcular_first(self):
-        # Inicializa o conjunto FIRST para cada não terminal
-        # com um conjunto vazio.
+        # Inicializa o conjunto FIRST para cada não terminal com um conjunto vazio.
+
         first = {nt: set() for nt in self.nao_terminais}
         
         mudou = True
-        #
         while mudou:
             mudou = False
             for producao in self.producoes:
                 cabeca = producao.obter_cabeca()
-                corpo = producao.obter_corpo()  # Supondo que corpo é uma lista de símbolos
+                corpo = producao.obter_corpo()
 
                 adicionou_epsilon = True
 
@@ -50,11 +49,8 @@ class Gramatica:
                         adicionou_epsilon = False
                         break
 
-
-                    # 2. Se X ∈ N então
                     # Se o símbolo é não terminal, adiciona os símbolos do conjunto FIRST
                     # do não terminal ao conjunto FIRST da cabeça da produção.
-                    
                     elif tipo == TipoSimbolo.naoTerminal:
                         for s in first[simbolo.obter_nome()]:
                             if s != '&' and s not in first[cabeca]:
@@ -64,7 +60,7 @@ class Gramatica:
                             adicionou_epsilon = False
                             break
                     
-                    # 2b Se X ::=ε∈P,entãoε∈FIRST(X)
+                    # Se X ::=ε∈P,então ε ∈ FIRST(X)
                     # Se o símbolo é epsilon, adiciona epsilon ao conjunto FIRST
                     elif tipo == TipoSimbolo.epsilon:
                         if '&' not in first[cabeca]:
@@ -106,7 +102,6 @@ class Gramatica:
                 for i in range(len(corpo)):
                     simbolo = corpo[i]
 
-                    # Só aplicamos regras de FOLLOW para não terminais
                     if simbolo.obter_tipo() != TipoSimbolo.naoTerminal:
                         continue
 

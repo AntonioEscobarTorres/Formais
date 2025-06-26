@@ -38,27 +38,19 @@ def main():
     
     # Geração da coleção canônica e do conjunto FOLLOW
     colecao_gerada, _ = gramatica.calcular_colecao_canonica()
-    follow_gerado = gramatica.calcular_follow() # Assumindo que sua classe tem este método
+    follow_gerado = gramatica.calcular_follow()
 
     print("Geração concluída.\n")
-
-    # --------------------------------------------------------------------------
-    # 2. Transformação dos Dados para o Formato do Parser
-    # --------------------------------------------------------------------------
     print("--- 2. Transformando dados para o formato do SLRParser ---")
 
     colecao_transformada = gramatica.obter_colecao_formato_parser()
     producoes_transformadas = gramatica.obter_producoes_formato_parser()
-    # Mock da gramática para o parser, usando as produções transformadas
     gramatica_para_parser = type('G', (), {'producoes': producoes_transformadas})()
 
     print("Transformação concluída. Exemplo de estado (I0) para o parser:")
     pprint(colecao_transformada[0])
     print("\n")
 
-    # --------------------------------------------------------------------------
-    # 3. Instanciação e Teste do Parser
-    # --------------------------------------------------------------------------
     print("--- 3. Instanciando e executando testes no SLRParser ---")
     
     # Instanciando o parser com os dados gerados e transformados

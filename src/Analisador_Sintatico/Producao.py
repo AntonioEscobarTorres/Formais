@@ -12,9 +12,7 @@ class Producao:
         return self.corpo
     
     def __str__(self):
-
         #return f"{self.cabeca} -> {self.corpo.obter_nome()}"
-
         # Itera sobre cada objeto Simbolo no corpo e obtém o seu nome.
         corpo_str = ' '.join([s.obter_nome() for s in self.corpo])
         
